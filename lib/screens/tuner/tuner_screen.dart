@@ -1,0 +1,10 @@
+import 'package:flutter/material.dart';
+
+class TunerScreen extends StatelessWidget {
+  const TunerScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(child: Text('Tuner screen'));
+  }
+}

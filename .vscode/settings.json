@@ -1,0 +1,32 @@
+{
+  "files.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/.DS_Store": true,
+    "**/Thumbs.db": true,
+    "**/flutter/ephemeral": true,
+    "**/Flutter/ephemeral": true,
+    "**/.symlinks": true,
+    "**/.plugin_symlinks": true,
+    "**/CVS": true,
+    "**/**.Designer.cs": true,
+    "**/20200[6-9]**.cs": true,
+    "**/*pubspec.lock": true,
+    "core/**/build.yaml": true,
+    "data/**/build.yaml": true,
+    "domain/**/build.yaml": true,
+    "features/**/build.yaml": true,
+    "**/build": true,
+    "**/.dart_tool": true,
+    "**/*.flutter-plugins": true,
+    "**/*.flutter-plugins-dependencies": true,
+    "**/*.iml": true,
+    "**/*.log": true,
+    "**/windows": true,
+    "**/*.freezed.dart": true,
+    "**/*.g.dart": true
+  },
+  "hide-files.files": [],
+  "yaml.schemaStore.enable": false
+}
