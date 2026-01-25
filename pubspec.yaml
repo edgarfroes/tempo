@@ -16,12 +16,21 @@ dependencies:
   bloc: ^9.2.0
   flutter_bloc: ^9.1.1
   freezed_annotation: ^3.1.0
+  pitch_detector_dart: ^0.0.7
+  flutter_audio_capture: ^1.1.12
+  permission_handler: ^12.0.1
+  audioplayers: ^6.5.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
   freezed: ^3.1.0
+  build_runner: ^2.10.5
 
 flutter:
   uses-material-design: true
+
+  assets:
+    - assets/
+    - assets/sounds/

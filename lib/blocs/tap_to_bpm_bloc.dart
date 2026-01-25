@@ -126,36 +126,6 @@ class TapToBpmBloc extends Bloc<TapToBpmEvent, TapToBpmState> {
       emit(const TapToBpmState.initial());
     }
   }
-
-  // @override
-  // void onChange(Change<TapToBpmState> change) {
-  //   super.onChange(change);
-  //   print(change);
-  // }
-
-  // @override
-  // void onTransition(Transition<TapToBpmEvent, TapToBpmState> transition) {
-  //   super.onTransition(transition);
-  //   print(transition);
-  // }
-
-  // @override
-  // void onDone(TapToBpmEvent event, [Object? error, StackTrace? stackTrace]) {
-  //   super.onDone(event, error, stackTrace);
-  //   print('$event, $error');
-  // }
-
-  // @override
-  // void onEvent(TapToBpmEvent event) {
-  //   super.onEvent(event);
-  //   print(event);
-  // }
-
-  // @override
-  // void onError(Object error, StackTrace stackTrace) {
-  //   print('$error, $stackTrace');
-  //   super.onError(error, stackTrace);
-  // }
 }
 
 @freezed

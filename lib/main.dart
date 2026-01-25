@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:tempo/screens/tap_to_bpm/tap_to_bpm_screen.dart';
-import 'package:tempo/screens/tuner/tuner_screen.dart';
+import 'package:tempo/screens/tap_to_bpm_screen.dart';
+import 'package:tempo/screens/tuner_screen.dart';
 
 void main() {
   runApp(const MyApp());

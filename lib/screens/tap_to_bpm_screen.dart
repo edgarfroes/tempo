@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:tempo/screens/tap_to_bpm/tap_to_bpm_bloc.dart';
+import 'package:tempo/blocs/tap_to_bpm_bloc.dart';
 
 class TapToBpmScreen extends StatelessWidget {
   const TapToBpmScreen({super.key});
