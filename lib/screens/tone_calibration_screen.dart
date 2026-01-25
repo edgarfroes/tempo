@@ -30,6 +30,7 @@ class _Calibrator extends StatelessWidget {
         buildWhen:
             (previous, current) => current.maybeWhen(
               initializing: () => true,
+              unsupported: () => true,
               displayingInstructions: () => true,
               errorInitializing: (_) => true,
               waitingCalibration: () => true,
@@ -48,6 +49,13 @@ class _Calibrator extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.all(20),
                   child: state.maybeMap(
+                    unsupported: (_) {
+                      return ErrorWithRetryComponent(
+                        errorMessage:
+                            'Unfortunately your device does not support this feature.',
+                        onRetry: context.read<ToneCalibrationCubit>().reload,
+                      );
+                    },
                     waitingCalibration: (_) {
                       return const _Intro();
                     },

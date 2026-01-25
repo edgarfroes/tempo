@@ -55,11 +55,12 @@ extension ToneCalibrationStatePatterns on ToneCalibrationState {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Initializing value)?  initializing,TResult Function( _ErrorInitializing value)?  errorInitializing,TResult Function( _WaitingCalibration value)?  waitingCalibration,TResult Function( _DisplayingInstructions value)?  displayingInstructions,TResult Function( _Calibrating value)?  calibrating,TResult Function( _Analyzing value)?  analyzing,TResult Function( _BadCalibration value)?  badCalibration,TResult Function( _ErrorCalibrating value)?  errorCalibrating,TResult Function( _Calibrated value)?  calibrated,TResult Function( _CalibrationInterrupted value)?  interrupted,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Initializing value)?  initializing,TResult Function( _Unsupported value)?  unsupported,TResult Function( _ErrorInitializing value)?  errorInitializing,TResult Function( _WaitingCalibration value)?  waitingCalibration,TResult Function( _DisplayingInstructions value)?  displayingInstructions,TResult Function( _Calibrating value)?  calibrating,TResult Function( _Analyzing value)?  analyzing,TResult Function( _BadCalibration value)?  badCalibration,TResult Function( _ErrorCalibrating value)?  errorCalibrating,TResult Function( _Calibrated value)?  calibrated,TResult Function( _CalibrationInterrupted value)?  interrupted,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Initializing() when initializing != null:
-return initializing(_that);case _ErrorInitializing() when errorInitializing != null:
+return initializing(_that);case _Unsupported() when unsupported != null:
+return unsupported(_that);case _ErrorInitializing() when errorInitializing != null:
 return errorInitializing(_that);case _WaitingCalibration() when waitingCalibration != null:
 return waitingCalibration(_that);case _DisplayingInstructions() when displayingInstructions != null:
 return displayingInstructions(_that);case _Calibrating() when calibrating != null:
@@ -86,11 +87,12 @@ return interrupted(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Initializing value)  initializing,required TResult Function( _ErrorInitializing value)  errorInitializing,required TResult Function( _WaitingCalibration value)  waitingCalibration,required TResult Function( _DisplayingInstructions value)  displayingInstructions,required TResult Function( _Calibrating value)  calibrating,required TResult Function( _Analyzing value)  analyzing,required TResult Function( _BadCalibration value)  badCalibration,required TResult Function( _ErrorCalibrating value)  errorCalibrating,required TResult Function( _Calibrated value)  calibrated,required TResult Function( _CalibrationInterrupted value)  interrupted,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Initializing value)  initializing,required TResult Function( _Unsupported value)  unsupported,required TResult Function( _ErrorInitializing value)  errorInitializing,required TResult Function( _WaitingCalibration value)  waitingCalibration,required TResult Function( _DisplayingInstructions value)  displayingInstructions,required TResult Function( _Calibrating value)  calibrating,required TResult Function( _Analyzing value)  analyzing,required TResult Function( _BadCalibration value)  badCalibration,required TResult Function( _ErrorCalibrating value)  errorCalibrating,required TResult Function( _Calibrated value)  calibrated,required TResult Function( _CalibrationInterrupted value)  interrupted,}){
 final _that = this;
 switch (_that) {
 case _Initializing():
-return initializing(_that);case _ErrorInitializing():
+return initializing(_that);case _Unsupported():
+return unsupported(_that);case _ErrorInitializing():
 return errorInitializing(_that);case _WaitingCalibration():
 return waitingCalibration(_that);case _DisplayingInstructions():
 return displayingInstructions(_that);case _Calibrating():
@@ -116,11 +118,12 @@ return interrupted(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Initializing value)?  initializing,TResult? Function( _ErrorInitializing value)?  errorInitializing,TResult? Function( _WaitingCalibration value)?  waitingCalibration,TResult? Function( _DisplayingInstructions value)?  displayingInstructions,TResult? Function( _Calibrating value)?  calibrating,TResult? Function( _Analyzing value)?  analyzing,TResult? Function( _BadCalibration value)?  badCalibration,TResult? Function( _ErrorCalibrating value)?  errorCalibrating,TResult? Function( _Calibrated value)?  calibrated,TResult? Function( _CalibrationInterrupted value)?  interrupted,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Initializing value)?  initializing,TResult? Function( _Unsupported value)?  unsupported,TResult? Function( _ErrorInitializing value)?  errorInitializing,TResult? Function( _WaitingCalibration value)?  waitingCalibration,TResult? Function( _DisplayingInstructions value)?  displayingInstructions,TResult? Function( _Calibrating value)?  calibrating,TResult? Function( _Analyzing value)?  analyzing,TResult? Function( _BadCalibration value)?  badCalibration,TResult? Function( _ErrorCalibrating value)?  errorCalibrating,TResult? Function( _Calibrated value)?  calibrated,TResult? Function( _CalibrationInterrupted value)?  interrupted,}){
 final _that = this;
 switch (_that) {
 case _Initializing() when initializing != null:
-return initializing(_that);case _ErrorInitializing() when errorInitializing != null:
+return initializing(_that);case _Unsupported() when unsupported != null:
+return unsupported(_that);case _ErrorInitializing() when errorInitializing != null:
 return errorInitializing(_that);case _WaitingCalibration() when waitingCalibration != null:
 return waitingCalibration(_that);case _DisplayingInstructions() when displayingInstructions != null:
 return displayingInstructions(_that);case _Calibrating() when calibrating != null:
@@ -146,10 +149,11 @@ return interrupted(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initializing,TResult Function( String message)?  errorInitializing,TResult Function()?  waitingCalibration,TResult Function()?  displayingInstructions,TResult Function()?  calibrating,TResult Function()?  analyzing,TResult Function()?  badCalibration,TResult Function( String message)?  errorCalibrating,TResult Function( double offset)?  calibrated,TResult Function()?  interrupted,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initializing,TResult Function()?  unsupported,TResult Function( String message)?  errorInitializing,TResult Function()?  waitingCalibration,TResult Function()?  displayingInstructions,TResult Function()?  calibrating,TResult Function()?  analyzing,TResult Function()?  badCalibration,TResult Function( String message)?  errorCalibrating,TResult Function( double offset)?  calibrated,TResult Function()?  interrupted,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initializing() when initializing != null:
-return initializing();case _ErrorInitializing() when errorInitializing != null:
+return initializing();case _Unsupported() when unsupported != null:
+return unsupported();case _ErrorInitializing() when errorInitializing != null:
 return errorInitializing(_that.message);case _WaitingCalibration() when waitingCalibration != null:
 return waitingCalibration();case _DisplayingInstructions() when displayingInstructions != null:
 return displayingInstructions();case _Calibrating() when calibrating != null:
@@ -176,10 +180,11 @@ return interrupted();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initializing,required TResult Function( String message)  errorInitializing,required TResult Function()  waitingCalibration,required TResult Function()  displayingInstructions,required TResult Function()  calibrating,required TResult Function()  analyzing,required TResult Function()  badCalibration,required TResult Function( String message)  errorCalibrating,required TResult Function( double offset)  calibrated,required TResult Function()  interrupted,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initializing,required TResult Function()  unsupported,required TResult Function( String message)  errorInitializing,required TResult Function()  waitingCalibration,required TResult Function()  displayingInstructions,required TResult Function()  calibrating,required TResult Function()  analyzing,required TResult Function()  badCalibration,required TResult Function( String message)  errorCalibrating,required TResult Function( double offset)  calibrated,required TResult Function()  interrupted,}) {final _that = this;
 switch (_that) {
 case _Initializing():
-return initializing();case _ErrorInitializing():
+return initializing();case _Unsupported():
+return unsupported();case _ErrorInitializing():
 return errorInitializing(_that.message);case _WaitingCalibration():
 return waitingCalibration();case _DisplayingInstructions():
 return displayingInstructions();case _Calibrating():
@@ -205,10 +210,11 @@ return interrupted();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initializing,TResult? Function( String message)?  errorInitializing,TResult? Function()?  waitingCalibration,TResult? Function()?  displayingInstructions,TResult? Function()?  calibrating,TResult? Function()?  analyzing,TResult? Function()?  badCalibration,TResult? Function( String message)?  errorCalibrating,TResult? Function( double offset)?  calibrated,TResult? Function()?  interrupted,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initializing,TResult? Function()?  unsupported,TResult? Function( String message)?  errorInitializing,TResult? Function()?  waitingCalibration,TResult? Function()?  displayingInstructions,TResult? Function()?  calibrating,TResult? Function()?  analyzing,TResult? Function()?  badCalibration,TResult? Function( String message)?  errorCalibrating,TResult? Function( double offset)?  calibrated,TResult? Function()?  interrupted,}) {final _that = this;
 switch (_that) {
 case _Initializing() when initializing != null:
-return initializing();case _ErrorInitializing() when errorInitializing != null:
+return initializing();case _Unsupported() when unsupported != null:
+return unsupported();case _ErrorInitializing() when errorInitializing != null:
 return errorInitializing(_that.message);case _WaitingCalibration() when waitingCalibration != null:
 return waitingCalibration();case _DisplayingInstructions() when displayingInstructions != null:
 return displayingInstructions();case _Calibrating() when calibrating != null:
@@ -249,6 +255,38 @@ int get hashCode => runtimeType.hashCode;
 @override
 String toString() {
   return 'ToneCalibrationState.initializing()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class _Unsupported implements ToneCalibrationState {
+  const _Unsupported();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Unsupported);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'ToneCalibrationState.unsupported()';
 }
 
 

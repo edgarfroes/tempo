@@ -31,6 +31,7 @@ class _Tuner extends StatelessWidget {
               initializing: (value) => true,
               initialized: (value) => true,
               errorInitializing: (value) => true,
+              unsupported: (value) => true,
               orElse: () => false,
             ),
         builder: (context, state) {
@@ -40,6 +41,13 @@ class _Tuner extends StatelessWidget {
             errorInitializing: (error) {
               return ErrorWithRetryComponent(
                 errorMessage: error.message,
+                onRetry: context.read<TunerCubit>().reload,
+              );
+            },
+            unsupported: (_) {
+              return ErrorWithRetryComponent(
+                errorMessage:
+                    'Unfortunately your device does not support this feature.',
                 onRetry: context.read<TunerCubit>().reload,
               );
             },

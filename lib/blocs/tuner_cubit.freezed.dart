@@ -55,11 +55,12 @@ extension TunerStatePatterns on TunerState {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Initializing value)?  initializing,TResult Function( _Initialized value)?  initialized,TResult Function( _Stopped value)?  stopped,TResult Function( _ErrorInitializing value)?  errorInitializing,TResult Function( _Tuning value)?  tuning,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Initializing value)?  initializing,TResult Function( _Unsupported value)?  unsupported,TResult Function( _Initialized value)?  initialized,TResult Function( _Stopped value)?  stopped,TResult Function( _ErrorInitializing value)?  errorInitializing,TResult Function( _Tuning value)?  tuning,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Initializing() when initializing != null:
-return initializing(_that);case _Initialized() when initialized != null:
+return initializing(_that);case _Unsupported() when unsupported != null:
+return unsupported(_that);case _Initialized() when initialized != null:
 return initialized(_that);case _Stopped() when stopped != null:
 return stopped(_that);case _ErrorInitializing() when errorInitializing != null:
 return errorInitializing(_that);case _Tuning() when tuning != null:
@@ -81,11 +82,12 @@ return tuning(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Initializing value)  initializing,required TResult Function( _Initialized value)  initialized,required TResult Function( _Stopped value)  stopped,required TResult Function( _ErrorInitializing value)  errorInitializing,required TResult Function( _Tuning value)  tuning,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Initializing value)  initializing,required TResult Function( _Unsupported value)  unsupported,required TResult Function( _Initialized value)  initialized,required TResult Function( _Stopped value)  stopped,required TResult Function( _ErrorInitializing value)  errorInitializing,required TResult Function( _Tuning value)  tuning,}){
 final _that = this;
 switch (_that) {
 case _Initializing():
-return initializing(_that);case _Initialized():
+return initializing(_that);case _Unsupported():
+return unsupported(_that);case _Initialized():
 return initialized(_that);case _Stopped():
 return stopped(_that);case _ErrorInitializing():
 return errorInitializing(_that);case _Tuning():
@@ -106,11 +108,12 @@ return tuning(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Initializing value)?  initializing,TResult? Function( _Initialized value)?  initialized,TResult? Function( _Stopped value)?  stopped,TResult? Function( _ErrorInitializing value)?  errorInitializing,TResult? Function( _Tuning value)?  tuning,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Initializing value)?  initializing,TResult? Function( _Unsupported value)?  unsupported,TResult? Function( _Initialized value)?  initialized,TResult? Function( _Stopped value)?  stopped,TResult? Function( _ErrorInitializing value)?  errorInitializing,TResult? Function( _Tuning value)?  tuning,}){
 final _that = this;
 switch (_that) {
 case _Initializing() when initializing != null:
-return initializing(_that);case _Initialized() when initialized != null:
+return initializing(_that);case _Unsupported() when unsupported != null:
+return unsupported(_that);case _Initialized() when initialized != null:
 return initialized(_that);case _Stopped() when stopped != null:
 return stopped(_that);case _ErrorInitializing() when errorInitializing != null:
 return errorInitializing(_that);case _Tuning() when tuning != null:
@@ -131,10 +134,11 @@ return tuning(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initializing,TResult Function()?  initialized,TResult Function()?  stopped,TResult Function( String message)?  errorInitializing,TResult Function( String key,  int octave,  double position,  bool isTuned)?  tuning,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initializing,TResult Function()?  unsupported,TResult Function()?  initialized,TResult Function()?  stopped,TResult Function( String message)?  errorInitializing,TResult Function( String key,  int octave,  double position,  bool isTuned)?  tuning,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initializing() when initializing != null:
-return initializing();case _Initialized() when initialized != null:
+return initializing();case _Unsupported() when unsupported != null:
+return unsupported();case _Initialized() when initialized != null:
 return initialized();case _Stopped() when stopped != null:
 return stopped();case _ErrorInitializing() when errorInitializing != null:
 return errorInitializing(_that.message);case _Tuning() when tuning != null:
@@ -156,10 +160,11 @@ return tuning(_that.key,_that.octave,_that.position,_that.isTuned);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initializing,required TResult Function()  initialized,required TResult Function()  stopped,required TResult Function( String message)  errorInitializing,required TResult Function( String key,  int octave,  double position,  bool isTuned)  tuning,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initializing,required TResult Function()  unsupported,required TResult Function()  initialized,required TResult Function()  stopped,required TResult Function( String message)  errorInitializing,required TResult Function( String key,  int octave,  double position,  bool isTuned)  tuning,}) {final _that = this;
 switch (_that) {
 case _Initializing():
-return initializing();case _Initialized():
+return initializing();case _Unsupported():
+return unsupported();case _Initialized():
 return initialized();case _Stopped():
 return stopped();case _ErrorInitializing():
 return errorInitializing(_that.message);case _Tuning():
@@ -180,10 +185,11 @@ return tuning(_that.key,_that.octave,_that.position,_that.isTuned);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initializing,TResult? Function()?  initialized,TResult? Function()?  stopped,TResult? Function( String message)?  errorInitializing,TResult? Function( String key,  int octave,  double position,  bool isTuned)?  tuning,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initializing,TResult? Function()?  unsupported,TResult? Function()?  initialized,TResult? Function()?  stopped,TResult? Function( String message)?  errorInitializing,TResult? Function( String key,  int octave,  double position,  bool isTuned)?  tuning,}) {final _that = this;
 switch (_that) {
 case _Initializing() when initializing != null:
-return initializing();case _Initialized() when initialized != null:
+return initializing();case _Unsupported() when unsupported != null:
+return unsupported();case _Initialized() when initialized != null:
 return initialized();case _Stopped() when stopped != null:
 return stopped();case _ErrorInitializing() when errorInitializing != null:
 return errorInitializing(_that.message);case _Tuning() when tuning != null:
@@ -219,6 +225,38 @@ int get hashCode => runtimeType.hashCode;
 @override
 String toString() {
   return 'TunerState.initializing()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class _Unsupported implements TunerState {
+  const _Unsupported();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Unsupported);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'TunerState.unsupported()';
 }
 
 

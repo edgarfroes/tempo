@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:tempo/locator.dart';
 import 'package:tempo/screens/tap_to_bpm_screen.dart';
 import 'package:tempo/screens/tuner_screen.dart';
 
-void main() {
+Future<void> main() async {
+  setupLocator();
+
   runApp(const MyApp());
 }
 

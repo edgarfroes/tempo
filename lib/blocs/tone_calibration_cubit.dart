@@ -1,10 +1,11 @@
 import 'dart:typed_data';
 
 import 'package:audioplayers/audioplayers.dart';
-import 'package:flutter_audio_capture/flutter_audio_capture.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:pitch_detector_dart/pitch_detector.dart';
+import 'package:tempo/locator.dart';
+import 'package:tempo/services/audio_capture/audio_capture_service.dart';
+import 'package:tempo/services/pitch_detector/pitch_detector_service.dart';
 
 part 'tone_calibration_cubit.freezed.dart';
 
@@ -15,15 +16,17 @@ class ToneCalibrationCubit extends Cubit<ToneCalibrationState> {
 
   final _player = AudioPlayer();
   final _capturedFrequencies = <double>[];
-  FlutterAudioCapture? _audioCapture;
-  PitchDetector? _pitchDetector;
+
+  final _audioCaptureService = locator.get<AudioCaptureService>();
+  final _pitchDetectorService = locator.get<PitchDetectorService>();
 
   final _sampleRate = 44100;
   final _bufferSize = 4000;
 
   @override
   Future<void> close() async {
-    await _audioCapture?.stop();
+    await _audioCaptureService.stop();
+
     await _player.dispose();
 
     return super.close();
@@ -32,21 +35,19 @@ class ToneCalibrationCubit extends Cubit<ToneCalibrationState> {
   Future<void> reload() => _initialize();
 
   Future<void> _initialize() async {
-    emit(const ToneCalibrationState.initializing());
-
     try {
-      _pitchDetector =
-          _pitchDetector ??
-          PitchDetector(
-            audioSampleRate: _sampleRate * 0.1,
-            bufferSize: _bufferSize,
-          );
+      emit(const ToneCalibrationState.initializing());
 
-      if (_audioCapture == null) {
-        _audioCapture = FlutterAudioCapture();
+      if (!_audioCaptureService.isSupported) {
+        emit(const ToneCalibrationState.unsupported());
 
-        await _audioCapture?.init();
+        return;
       }
+
+      await _audioCaptureService.init(
+        bufferSize: _bufferSize,
+        sampleRate: _sampleRate,
+      );
 
       emit(const ToneCalibrationState.waitingCalibration());
     } on Exception catch (_) {
@@ -61,14 +62,14 @@ class ToneCalibrationCubit extends Cubit<ToneCalibrationState> {
   Future<void> _audioListener(Float32List obj) async {
     final buffer = Float64List.fromList(obj.cast<double>());
 
-    final result = await _pitchDetector!.getPitchFromFloatBuffer(buffer);
+    final pitch = await _pitchDetectorService.getPitchFromFloatBuffer(buffer);
 
     // Anything below this is just noise.
-    if (result.pitch < 14) {
+    if (pitch < 14) {
       return;
     }
 
-    _capturedFrequencies.add(result.pitch);
+    _capturedFrequencies.add(pitch);
   }
 
   void _onCaptureError(Object e) {
@@ -82,11 +83,9 @@ class ToneCalibrationCubit extends Cubit<ToneCalibrationState> {
 
   Future<void> startCalibration() async {
     try {
-      await _audioCapture?.start(
-        _audioListener,
-        _onCaptureError,
-        sampleRate: _pitchDetector!.audioSampleRate.floor(),
-        bufferSize: _pitchDetector!.bufferSize,
+      await _audioCaptureService.start(
+        listener: _audioListener,
+        onError: _onCaptureError,
       );
 
       emit(const ToneCalibrationState.calibrating());
@@ -120,7 +119,7 @@ class ToneCalibrationCubit extends Cubit<ToneCalibrationState> {
       // Fake delay for UI feedback;
       await Future.delayed(const Duration(seconds: 1));
 
-      await _audioCapture?.stop();
+      await _audioCaptureService.stop();
 
       emit(ToneCalibrationState.calibrated(offset: offset));
     } on Exception {
@@ -133,14 +132,15 @@ class ToneCalibrationCubit extends Cubit<ToneCalibrationState> {
   }
 
   Future<void> stopCalibration() async {
-    await _audioCapture?.stop();
     await _player.stop();
+    await _audioCaptureService.stop();
   }
 }
 
 @freezed
 abstract class ToneCalibrationState with _$ToneCalibrationState {
   const factory ToneCalibrationState.initializing() = _Initializing;
+  const factory ToneCalibrationState.unsupported() = _Unsupported;
   const factory ToneCalibrationState.errorInitializing({
     required String message,
   }) = _ErrorInitializing;

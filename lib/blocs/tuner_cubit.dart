@@ -1,9 +1,10 @@
 import 'dart:typed_data';
 
-import 'package:flutter_audio_capture/flutter_audio_capture.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:pitch_detector_dart/pitch_detector.dart';
+import 'package:tempo/locator.dart';
+import 'package:tempo/services/audio_capture/audio_capture_service.dart';
+import 'package:tempo/services/pitch_detector/pitch_detector_service.dart';
 
 part 'tuner_cubit.freezed.dart';
 
@@ -15,6 +16,9 @@ class TunerCubit extends Cubit<TunerState> {
   final _sampleRate = 44100;
   final _bufferSize = 4000;
   var _calibrationOffset = 0.0;
+
+  final _audioCaptureService = locator.get<AudioCaptureService>();
+  final _pitchDetectorService = locator.get<PitchDetectorService>();
 
   final chromaticFrequencies = <double>[
     16.35,
@@ -127,23 +131,31 @@ class TunerCubit extends Cubit<TunerState> {
     7902.13,
   ];
 
-  FlutterAudioCapture? _audioCapture;
-  PitchDetector? _pitchDetector;
-
   final intervals = <_TuneInterval>[];
 
   Future<void> reload() => _initialize();
 
   Future<void> _initialize() async {
     try {
-      _pitchDetector =
-          _pitchDetector ??
-          PitchDetector(
-            audioSampleRate: _sampleRate * 0.1,
-            bufferSize: _bufferSize,
-          );
+      if (!_audioCaptureService.isSupported) {
+        emit(const TunerState.unsupported());
 
-      await _startAudioCapture();
+        return;
+      }
+      await _audioCaptureService.init(
+        bufferSize: _bufferSize,
+        sampleRate: _sampleRate,
+      );
+
+      _pitchDetectorService.init(
+        bufferSize: _bufferSize,
+        sampleRate: _sampleRate,
+      );
+
+      await _audioCaptureService.start(
+        listener: _audioListener,
+        onError: _onCaptureError,
+      );
 
       for (var i = 0; i < chromaticFrequencies.length; i++) {
         final mod = i % 12;
@@ -188,7 +200,7 @@ class TunerCubit extends Cubit<TunerState> {
       }
 
       emit(const TunerState.initialized());
-    } on Exception catch (_) {
+    } on Exception {
       emit(
         const TunerState.errorInitializing(
           message: 'Error initializing tuner, try again',
@@ -197,24 +209,9 @@ class TunerCubit extends Cubit<TunerState> {
     }
   }
 
-  Future<void> _startAudioCapture() async {
-    await _audioCapture?.stop();
-
-    _audioCapture = FlutterAudioCapture();
-
-    await _audioCapture?.init();
-
-    await _audioCapture?.start(
-      _audioListener,
-      _onCaptureError,
-      sampleRate: _pitchDetector!.audioSampleRate.floor(),
-      bufferSize: _pitchDetector!.bufferSize,
-    );
-  }
-
   @override
   Future<void> close() async {
-    await _audioCapture!.stop();
+    await _audioCaptureService.stop();
 
     return super.close();
   }
@@ -224,9 +221,9 @@ class TunerCubit extends Cubit<TunerState> {
   Future<void> _audioListener(Float32List obj) async {
     final buffer = Float64List.fromList(obj.cast<double>());
 
-    final result = await _pitchDetector!.getPitchFromFloatBuffer(buffer);
-
-    final pitch = result.pitch + _calibrationOffset;
+    final pitch =
+        (await _pitchDetectorService.getPitchFromFloatBuffer(buffer)) +
+        _calibrationOffset;
 
     if (pitch < chromaticFrequencies[0]) {
       final stoppedAt = _tuningLoop;
@@ -287,17 +284,21 @@ class TunerCubit extends Cubit<TunerState> {
   }
 
   Future<void> pauseAudioCapture() async {
-    await _audioCapture?.stop();
+    await _audioCaptureService.stop();
   }
 
   Future<void> startAudioCapture() async {
-    await _startAudioCapture();
+    await _audioCaptureService.start(
+      listener: _audioListener,
+      onError: _onCaptureError,
+    );
   }
 }
 
 @freezed
 abstract class TunerState with _$TunerState {
   const factory TunerState.initializing() = _Initializing;
+  const factory TunerState.unsupported() = _Unsupported;
   const factory TunerState.initialized() = _Initialized;
   const factory TunerState.stopped() = _Stopped;
   const factory TunerState.errorInitializing({required String message}) =
