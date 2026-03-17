@@ -23,121 +23,119 @@ class _Tuner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => TunerCubit(),
-      child: BlocBuilder<TunerCubit, TunerState>(
-        buildWhen:
-            (previous, current) => current.maybeMap(
-              initializing: (value) => true,
-              initialized: (value) => true,
-              errorInitializing: (value) => true,
-              unsupported: (value) => true,
-              orElse: () => false,
-            ),
-        builder: (context, state) {
-          return state.maybeMap(
-            initializing:
-                (_) => const Center(child: CircularProgressIndicator()),
-            errorInitializing: (error) {
-              return ErrorWithRetryComponent(
-                errorMessage: error.message,
-                onRetry: context.read<TunerCubit>().reload,
-              );
-            },
-            unsupported: (_) {
-              return ErrorWithRetryComponent(
-                errorMessage:
-                    'Unfortunately your device does not support this feature.',
-                onRetry: context.read<TunerCubit>().reload,
-              );
-            },
-            orElse: () {
-              return BlocBuilder<TunerCubit, TunerState>(
-                buildWhen:
-                    (previous, current) => current.maybeMap(
-                      initialized: (_) => true,
-                      tuning: (_) => true,
-                      stopped: (_) => true,
-                      orElse: () => false,
-                    ),
-                builder: (context, state) {
-                  return Column(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.max,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              state.maybeMap(
-                                orElse: () => '',
-                                tuning: (data) => data.key,
-                              ),
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 90,
-                              ),
-                            ),
-                            const SizedBox(height: 30),
-                            ToneMeter(
-                              position: state.maybeMap(
-                                tuning: (data) => data.position,
-                                orElse: () => null,
-                              ),
-                              isTuned: state.maybeMap(
-                                tuning: (data) => data.isTuned,
-                                orElse: () => false,
-                              ),
-                            ),
-                          ],
-                        ),
+    return Scaffold(
+      body: BlocProvider(
+        create: (context) => TunerCubit(),
+        child: BlocBuilder<TunerCubit, TunerState>(
+          buildWhen:
+              (previous, current) => current.maybeMap(
+                initializing: (value) => true,
+                initialized: (value) => true,
+                errorInitializing: (value) => true,
+                unsupported: (value) => true,
+                orElse: () => false,
+              ),
+          builder: (context, state) {
+            return state.maybeMap(
+              initializing:
+                  (_) => const Center(child: CircularProgressIndicator()),
+              errorInitializing: (error) {
+                return ErrorWithRetryComponent(
+                  errorMessage: error.message,
+                  onRetry: context.read<TunerCubit>().reload,
+                );
+              },
+              unsupported: (_) {
+                return ErrorWithRetryComponent(
+                  errorMessage:
+                      'Unfortunately your device does not support this feature.',
+                  onRetry: context.read<TunerCubit>().reload,
+                );
+              },
+              orElse: () {
+                return BlocBuilder<TunerCubit, TunerState>(
+                  buildWhen:
+                      (previous, current) => current.maybeMap(
+                        initialized: (_) => true,
+                        tuning: (_) => true,
+                        stopped: (_) => true,
+                        orElse: () => false,
                       ),
-                      const SizedBox(height: 30),
-                      ElevatedButton(
-                        onPressed: () async {
-                          final cubit = context.read<TunerCubit>();
-
-                          await cubit.pauseAudioCapture();
-
-                          await Future.delayed(
-                            const Duration(milliseconds: 300),
-                          );
-
-                          if (!context.mounted) {
-                            return;
-                          }
-
-                          final calibrationOffset = await Navigator.of(
-                            context,
-                          ).push(
-                            MaterialPageRoute(
-                              builder:
-                                  (context) => const ToneCalibrationScreen(),
-                            ),
-                          );
-
-                          if (calibrationOffset is double) {
-                            cubit.setCalibration(calibrationOffset);
-                          }
-
-                          await cubit.startAudioCapture();
-                        },
-                        child: const Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.mic_rounded),
-                            SizedBox(width: 4),
-                            Text('Calibrate'),
-                          ],
+                  builder: (context, state) {
+                    return Column(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.max,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                state.maybeMap(
+                                  orElse: () => '',
+                                  tuning: (data) => data.key,
+                                ),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 90,
+                                ),
+                              ),
+                              const SizedBox(height: 30),
+                              ToneMeter(
+                                position: state.maybeMap(
+                                  tuning: (data) => data.position,
+                                  orElse: () => null,
+                                ),
+                                isTuned: state.maybeMap(
+                                  tuning: (data) => data.isTuned,
+                                  orElse: () => false,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
-                  );
-                },
-              );
-            },
-          );
-        },
+                        const SizedBox(height: 30),
+                        ElevatedButton(
+                          onPressed: () async {
+                            final cubit = context.read<TunerCubit>();
+
+                            await cubit.stopAudioCapture();
+
+                            if (!context.mounted) {
+                              return;
+                            }
+
+                            final calibrationOffset = await Navigator.of(
+                              context,
+                            ).push(
+                              MaterialPageRoute(
+                                builder:
+                                    (context) => const ToneCalibrationScreen(),
+                              ),
+                            );
+
+                            if (calibrationOffset is double) {
+                              cubit.setCalibration(calibrationOffset);
+                            }
+
+                            await cubit.startAudioCapture();
+                          },
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.mic_rounded),
+                              SizedBox(width: 4),
+                              Text('Calibrate'),
+                            ],
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+            );
+          },
+        ),
       ),
     );
   }
@@ -154,13 +152,19 @@ class ToneMeter extends StatefulWidget {
 }
 
 class _ToneMeterState extends State<ToneMeter> with TickerProviderStateMixin {
-  late final AnimationController _controller;
+  late final AnimationController _positionController;
+  late final AnimationController _opacityController;
 
   @override
   void initState() {
-    _controller = AnimationController(
+    _positionController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 30),
+    );
+
+    _opacityController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 100),
     );
 
     super.initState();
@@ -168,7 +172,7 @@ class _ToneMeterState extends State<ToneMeter> with TickerProviderStateMixin {
 
   @override
   void dispose() {
-    _controller.dispose();
+    _positionController.dispose();
 
     super.dispose();
   }
@@ -178,35 +182,32 @@ class _ToneMeterState extends State<ToneMeter> with TickerProviderStateMixin {
     super.didUpdateWidget(oldWidget);
 
     if (widget.isTuned) {
-      _controller.animateTo(0.5, duration: const Duration(milliseconds: 30));
-      setState(() {
-        _displayMeter = true;
-      });
+      _positionController.animateTo(
+        0.5,
+        duration: const Duration(milliseconds: 30),
+      );
+
+      _opacityController.animateTo(1);
 
       return;
     }
 
     if (widget.position == null) {
-      setState(() {
-        _displayMeter = false;
-      });
+      _opacityController.animateTo(
+        0,
+        duration: const Duration(milliseconds: 500),
+      );
 
       return;
     }
 
-    if (!_displayMeter) {
-      setState(() {
-        _displayMeter = true;
-      });
-    }
-
-    _controller.animateTo(
+    _positionController.animateTo(
       (widget.position! + 1) / 2,
-      duration: const Duration(milliseconds: 40),
+      duration: const Duration(milliseconds: 30),
     );
-  }
 
-  var _displayMeter = false;
+    _opacityController.animateTo(1);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -216,34 +217,57 @@ class _ToneMeterState extends State<ToneMeter> with TickerProviderStateMixin {
     return Stack(
       alignment: Alignment.center,
       children: [
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 50 / 2),
+          child: Row(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _MeterLine(
+                meterHeight: meterHeight,
+                text: '-50c',
+                alignment: CrossAxisAlignment.start,
+              ),
+              _MeterLine(
+                meterHeight: meterHeight,
+                text: '+50c',
+                alignment: CrossAxisAlignment.end,
+              ),
+            ],
+          ),
+        ),
         LayoutBuilder(
           builder: (context, constraints) {
             final width = constraints.maxWidth;
 
-            if (!_displayMeter) {
-              return SizedBox(width: width, height: meterHeight);
-            }
-
             return AnimatedBuilder(
-              animation: _controller,
+              animation: Listenable.merge([
+                _positionController,
+                _opacityController,
+              ]),
               builder: (context, child) {
+                final left = _positionController.value * (width - meterWidth);
+
                 return SizedBox(
                   height: meterHeight,
                   child: Stack(
                     children: [
                       Positioned(
-                        left: _controller.value * (width - meterWidth),
-                        child: Container(
-                          height: meterHeight,
-                          width: meterWidth,
-                          decoration: BoxDecoration(
-                            color:
-                                _controller.value == 0.5
-                                    ? Colors.green
-                                    : Colors.deepOrange,
+                        left: left,
+                        child: Opacity(
+                          opacity: _opacityController.value,
+                          child: Container(
+                            height: meterHeight,
+                            width: meterWidth,
+                            decoration: BoxDecoration(
+                              color:
+                                  _positionController.value == 0.5
+                                      ? Colors.green
+                                      : Colors.deepOrange,
 
-                            borderRadius: const BorderRadius.all(
-                              Radius.circular(3),
+                              borderRadius: const BorderRadius.all(
+                                Radius.circular(3),
+                              ),
                             ),
                           ),
                         ),
@@ -270,6 +294,38 @@ class _ToneMeterState extends State<ToneMeter> with TickerProviderStateMixin {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _MeterLine extends StatelessWidget {
+  const _MeterLine({
+    required this.meterHeight,
+    required this.text,
+    required this.alignment,
+  });
+
+  final double meterHeight;
+  final String text;
+  final CrossAxisAlignment alignment;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: meterHeight,
+      child: Column(
+        crossAxisAlignment: alignment,
+        children: [
+          Text(
+            text,
+            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+          ),
+          Container(height: 10),
+          Expanded(
+            child: Container(width: 1, color: Colors.white.withAlpha(60)),
+          ),
+        ],
+      ),
     );
   }
 }

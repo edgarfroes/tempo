@@ -4,7 +4,10 @@ import 'package:flutter_audio_capture/flutter_audio_capture.dart';
 import 'package:tempo/services/audio_capture/audio_capture_service.dart';
 
 final class MobileAudioCaptureServiceImpl extends AudioCaptureService {
-  MobileAudioCaptureServiceImpl();
+  MobileAudioCaptureServiceImpl({
+    required super.bufferSize,
+    required super.sampleRate,
+  });
 
   final _audioCapture = FlutterAudioCapture();
 
@@ -12,7 +15,7 @@ final class MobileAudioCaptureServiceImpl extends AudioCaptureService {
   bool get isSupported => true;
 
   @override
-  Future<void> init({required int bufferSize, required int sampleRate}) async {
+  Future<void> init() async {
     if (super.disposed) {
       throw const CantUseDisposedAudioServiceException();
     }
@@ -24,7 +27,7 @@ final class MobileAudioCaptureServiceImpl extends AudioCaptureService {
         throw AudioCaptureServiceInitializationException();
       }
 
-      await super.init(bufferSize: bufferSize, sampleRate: sampleRate);
+      await super.init();
     } on Exception catch (ex, stackTrace) {
       throw AudioCaptureServiceInitializationException(
         ex: ex,
@@ -35,11 +38,11 @@ final class MobileAudioCaptureServiceImpl extends AudioCaptureService {
 
   @override
   Future<void> dispose() async {
-    if (super.disposed) {
-      return;
-    }
-
     try {
+      if (super.disposed) {
+        return;
+      }
+
       if (!super.isInitialized) {
         return;
       }
@@ -85,11 +88,11 @@ final class MobileAudioCaptureServiceImpl extends AudioCaptureService {
 
   @override
   Future<void> stop() async {
-    await super.stop();
-
-    await _stop();
-
     try {
+      await super.stop();
+
+      await _stop();
+
       await _audioCapture.stop();
     } on Exception catch (ex, stackTrace) {
       throw AudioCaptureServiceStopException(ex: ex, stackTrace: stackTrace);

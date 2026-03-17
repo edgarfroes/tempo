@@ -3,12 +3,10 @@ import 'dart:typed_data';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 abstract class AudioCaptureService {
-  AudioCaptureService();
+  AudioCaptureService({required this.sampleRate, required this.bufferSize});
 
-  late final int sampleRate;
-  late final int bufferSize;
-  late final void Function(Float32List obj) listener;
-  late final void Function(Object e) onError;
+  final int sampleRate;
+  final int bufferSize;
 
   bool get isPlaying => _isPlaying;
   bool _isPlaying = false;
@@ -23,7 +21,7 @@ abstract class AudioCaptureService {
 
   @mustCallSuper
   @mustBeOverridden
-  Future<void> init({required int bufferSize, required int sampleRate}) async {
+  Future<void> init() async {
     if (_disposed) {
       throw const CantUseDisposedAudioServiceException();
     }
@@ -31,9 +29,6 @@ abstract class AudioCaptureService {
     if (isInitialized) {
       return;
     }
-
-    this.bufferSize = bufferSize;
-    this.sampleRate = sampleRate;
 
     _isInitialized = true;
   }
@@ -47,9 +42,6 @@ abstract class AudioCaptureService {
     if (_disposed) {
       throw const CantUseDisposedAudioServiceException();
     }
-
-    this.listener = listener;
-    this.onError = onError;
 
     _isPlaying = true;
   }

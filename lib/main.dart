@@ -2,9 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:tempo/locator.dart';
 import 'package:tempo/screens/tap_to_bpm_screen.dart';
 import 'package:tempo/screens/tuner_screen.dart';
+import 'package:tempo/services/audio_capture/audio_capture_service.dart';
 
 Future<void> main() async {
   setupLocator();
+
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await locator.get<AudioCaptureService>().init();
 
   runApp(const MyApp());
 }

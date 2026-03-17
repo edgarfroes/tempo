@@ -3,13 +3,16 @@ import 'dart:typed_data';
 import 'package:tempo/services/audio_capture/audio_capture_service.dart';
 
 final class WebAudioCaptureServiceImpl extends AudioCaptureService {
-  WebAudioCaptureServiceImpl();
+  WebAudioCaptureServiceImpl({
+    required super.sampleRate,
+    required super.bufferSize,
+  });
 
   @override
   bool get isSupported => false;
 
   @override
-  Future<void> init({required int bufferSize, required int sampleRate}) {
+  Future<void> init() {
     // TODO: implement init
     throw UnimplementedError();
   }

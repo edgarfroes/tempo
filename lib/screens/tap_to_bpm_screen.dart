@@ -4,9 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tempo/blocs/tap_to_bpm_bloc.dart';
 
-class TapToBpmScreen extends StatelessWidget {
+class TapToBpmScreen extends StatefulWidget {
   const TapToBpmScreen({super.key});
 
+  @override
+  State<TapToBpmScreen> createState() => _TapToBpmScreenState();
+}
+
+class _TapToBpmScreenState extends State<TapToBpmScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(

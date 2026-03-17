@@ -13,8 +13,6 @@ class TunerCubit extends Cubit<TunerState> {
     _initialize();
   }
 
-  final _sampleRate = 44100;
-  final _bufferSize = 4000;
   var _calibrationOffset = 0.0;
 
   final _audioCaptureService = locator.get<AudioCaptureService>();
@@ -142,20 +140,6 @@ class TunerCubit extends Cubit<TunerState> {
 
         return;
       }
-      await _audioCaptureService.init(
-        bufferSize: _bufferSize,
-        sampleRate: _sampleRate,
-      );
-
-      _pitchDetectorService.init(
-        bufferSize: _bufferSize,
-        sampleRate: _sampleRate,
-      );
-
-      await _audioCaptureService.start(
-        listener: _audioListener,
-        onError: _onCaptureError,
-      );
 
       for (var i = 0; i < chromaticFrequencies.length; i++) {
         final mod = i % 12;
@@ -199,7 +183,7 @@ class TunerCubit extends Cubit<TunerState> {
         );
       }
 
-      emit(const TunerState.initialized());
+      await startAudioCapture();
     } on Exception {
       emit(
         const TunerState.errorInitializing(
@@ -207,13 +191,6 @@ class TunerCubit extends Cubit<TunerState> {
         ),
       );
     }
-  }
-
-  @override
-  Future<void> close() async {
-    await _audioCaptureService.stop();
-
-    return super.close();
   }
 
   var _tuningLoop = 0;
@@ -227,8 +204,6 @@ class TunerCubit extends Cubit<TunerState> {
 
     if (pitch < chromaticFrequencies[0]) {
       final stoppedAt = _tuningLoop;
-
-      await Future.delayed(const Duration(milliseconds: 500));
 
       if (_tuningLoop == stoppedAt) {
         emit(const TunerState.stopped());
@@ -250,14 +225,15 @@ class TunerCubit extends Cubit<TunerState> {
       return;
     }
 
-    // -1 is the lower limit.
+    // -1 is the lowerLimit.
     // 0 is in the middle (on tone).
-    // 1 is the upper limit.
-
-    final interval = closestFrequency.upperLimit - closestFrequency.lowerLimit;
-    final diff = pitch - closestFrequency.frequency;
-
-    final position = diff / interval;
+    // 1 is the upperLimit.
+    // position should take pitch and generate a value between -1 and 1
+    final position =
+        (pitch - closestFrequency.lowerLimit) /
+            (closestFrequency.upperLimit - closestFrequency.lowerLimit) *
+            2 -
+        1;
 
     final isWithinTuningTolerance = position > -0.01 && position < 0.01;
 
@@ -283,7 +259,7 @@ class TunerCubit extends Cubit<TunerState> {
     print(e);
   }
 
-  Future<void> pauseAudioCapture() async {
+  Future<void> stopAudioCapture() async {
     await _audioCaptureService.stop();
   }
 
@@ -292,6 +268,8 @@ class TunerCubit extends Cubit<TunerState> {
       listener: _audioListener,
       onError: _onCaptureError,
     );
+
+    emit(const TunerState.initialized());
   }
 }
 

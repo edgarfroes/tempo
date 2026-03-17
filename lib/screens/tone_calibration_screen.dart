@@ -154,16 +154,7 @@ class _Calibrating extends StatelessWidget {
                             context
                                 .read<ToneCalibrationCubit>()
                                 .displayInstructions,
-                    calibrated:
-                        (offset) => () async {
-                          await context
-                              .read<ToneCalibrationCubit>()
-                              .stopCalibration();
-
-                          if (context.mounted) {
-                            Navigator.of(context).pop(offset);
-                          }
-                        },
+                    calibrated: (offset) => Navigator.of(context).pop,
                     orElse:
                         () =>
                             context
@@ -522,13 +513,7 @@ class _Instructions extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             TextButton(
-              onPressed: () async {
-                await context.read<ToneCalibrationCubit>().stopCalibration();
-
-                if (context.mounted) {
-                  Navigator.of(context).pop();
-                }
-              },
+              onPressed: Navigator.of(context).pop,
 
               child: Container(
                 width: double.infinity,
@@ -592,14 +577,7 @@ class _Intro extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             TextButton(
-              onPressed: () async {
-                await context.read<ToneCalibrationCubit>().stopCalibration();
-
-                if (context.mounted) {
-                  Navigator.of(context).pop();
-                }
-              },
-
+              onPressed: Navigator.of(context).pop,
               child: Container(
                 width: double.infinity,
                 alignment: Alignment.center,

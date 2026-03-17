@@ -3,7 +3,7 @@ import 'dart:typed_data';
 import 'package:tempo/services/audio_capture/audio_capture_service.dart';
 
 class UnsupportedAudioCaptureServiceImpl extends AudioCaptureService {
-  UnsupportedAudioCaptureServiceImpl();
+  UnsupportedAudioCaptureServiceImpl() : super(bufferSize: 0, sampleRate: 0);
 
   @override
   bool get disposed => true;
@@ -13,7 +13,7 @@ class UnsupportedAudioCaptureServiceImpl extends AudioCaptureService {
 
   @override
   // ignore: must_call_super
-  Future<void> init({required int bufferSize, required int sampleRate}) async {
+  Future<void> init() async {
     throw const UnsupportedAudioServiceException();
   }
 

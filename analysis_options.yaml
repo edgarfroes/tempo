@@ -59,7 +59,6 @@ linter:
     one_member_abstracts: false
     only_throw_errors: true
     overridden_fields: true
-    package_api_docs: true
     parameter_assignments: true
     prefer_adjacent_string_concatenation: true
     prefer_conditional_assignment: true
@@ -69,7 +68,6 @@ linter:
     type_init_formals: true
     type_annotate_public_apis: true
     tighten_type_of_initializing_formals: true
-    super_goes_last: true
     sort_unnamed_constructors_first: true
     sort_constructors_first: false
     sort_child_properties_last: true
@@ -94,7 +92,6 @@ linter:
     prefer_final_locals: true
     prefer_final_fields: true
     prefer_expression_function_bodies: false
-    prefer_equal_for_default_values: true
     prefer_constructors_over_static_methods: true
     prefer_const_literals_to_create_immutables: true
     use_to_and_as_if_applicable: true
