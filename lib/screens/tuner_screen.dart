@@ -1,330 +1,431 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tempo/blocs/meter_cubit.dart';
 import 'package:tempo/blocs/permission_cubit.dart';
 import 'package:tempo/blocs/tuner_cubit.dart';
-import 'package:tempo/components/error_with_retry_component.dart';
-import 'package:tempo/components/permission_wrapper_component.dart';
-import 'package:tempo/screens/tone_calibration_screen.dart';
+import 'package:tempo/components/permission_wrapper.dart';
 
 class TunerScreen extends StatelessWidget {
   const TunerScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return PermissionWrapperComponent(
+    return PermissionWrapper(
       permission: Permission.microphone(),
-      grantedBuilder: (context) => const _Tuner(),
+      grantedBuilder: (context) => const _Tuner2(),
     );
   }
 }
 
-class _Tuner extends StatelessWidget {
-  const _Tuner();
+class _Tuner2 extends StatelessWidget {
+  const _Tuner2();
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: BlocProvider(
-        create: (context) => TunerCubit(),
-        child: BlocBuilder<TunerCubit, TunerState>(
-          buildWhen:
-              (previous, current) => current.maybeMap(
-                initializing: (value) => true,
-                initialized: (value) => true,
-                errorInitializing: (value) => true,
-                unsupported: (value) => true,
-                orElse: () => false,
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (context) => TunerCubit()),
+        BlocProvider(
+          create:
+              (context) =>
+                  MeterCubit(refreshRate: const MeterRefreshRate.fast()),
+        ),
+      ],
+      child: BlocListener<TunerCubit, TunerState>(
+        listener: (context, state) {
+          state.mapOrNull(
+            tuning: (data) {
+              if (data.isTuned) {
+                // TODO: add a haptic feedback.
+              }
+            },
+          );
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Stack(
+            children: [
+              const Positioned(left: 0, top: 0, child: _SoundMeter()),
+              Positioned.fill(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    BlocBuilder<TunerCubit, TunerState>(
+                      buildWhen:
+                          (previous, current) => current.maybeMap(
+                            tuning: (_) => true,
+                            stopped: (_) => true,
+                            orElse: () => false,
+                          ),
+                      builder: (context, state) {
+                        final key = state.mapOrNull(
+                          tuning: (data) => data.key,
+                          stopped: (data) => data.lastKey,
+                        );
+
+                        final octave = state.mapOrNull(
+                          tuning: (data) => '${data.octave}',
+                          stopped: (data) => data.lastOctave?.toString(),
+                        );
+                        return AnimatedDefaultTextStyle(
+                          duration: const Duration(milliseconds: 100),
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: state.maybeMap(
+                              tuning:
+                                  (data) =>
+                                      data.isTuned ? _tunedColor : _tuningColor,
+                              stopped:
+                                  (data) =>
+                                      data.lastKey != null
+                                          ? Colors.white.withValues(alpha: 0.1)
+                                          : Colors.white,
+                              orElse: () => Colors.white,
+                            ),
+                          ),
+                          child: Semantics(
+                            label:
+                                key != null && octave != null
+                                    ? key + octave
+                                    : '',
+                            excludeSemantics: true,
+
+                            child: Text.rich(
+                              textAlign: TextAlign.start,
+                              TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text: octave ?? ' ',
+                                    style: const TextStyle(
+                                      fontSize: 30,
+                                      color: Colors.transparent,
+                                    ),
+                                  ),
+                                  if (key != null && key.length > 1)
+                                    const TextSpan(
+                                      text: '#',
+                                      style: TextStyle(
+                                        fontSize: 90,
+                                        color: Colors.transparent,
+                                      ),
+                                    ),
+                                  TextSpan(
+                                    text: key ?? ' ',
+                                    style: const TextStyle(fontSize: 90),
+                                  ),
+                                  TextSpan(
+                                    text: octave ?? ' ',
+                                    style: const TextStyle(fontSize: 30),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        const rulerItems = [
+                          _SmallBar(),
+                          _SmallBar(),
+                          _MediumBar(),
+                          _SmallBar(),
+                          _SmallBar(),
+                          _SmallBar(),
+                          _SmallBar(),
+                          _MediumBar(),
+                          _SmallBar(),
+                          _SmallBar(),
+                          _SmallBar(),
+                          _SmallBar(),
+                          _LargeBar(),
+                          _SmallBar(),
+                          _SmallBar(),
+                          _SmallBar(),
+                          _SmallBar(),
+                          _MediumBar(),
+                          _SmallBar(),
+                          _SmallBar(),
+                          _SmallBar(),
+                          _SmallBar(),
+                          _MediumBar(),
+                          _SmallBar(),
+                          _SmallBar(),
+                        ];
+
+                        return SizedBox(
+                          width: constraints.maxWidth,
+                          child: Stack(
+                            alignment: Alignment.centerLeft,
+                            children: [
+                              const Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                mainAxisSize: MainAxisSize.max,
+                                children: rulerItems,
+                              ),
+
+                              BlocBuilder<TunerCubit, TunerState>(
+                                builder: (context, state) {
+                                  return state.maybeMap(
+                                    tuning: (data) {
+                                      final position =
+                                          (rulerItems.length *
+                                              (data.position + 1)) /
+                                          2;
+
+                                      final isTuned = state.maybeMap(
+                                        tuning: (data) => data.isTuned,
+                                        orElse: () => false,
+                                      );
+
+                                      final isStopped = state.maybeMap(
+                                        stopped: (data) => true,
+                                        orElse: () => false,
+                                      );
+
+                                      return AnimatedPositioned(
+                                        duration: const Duration(
+                                          milliseconds: 100,
+                                        ),
+                                        left:
+                                            isTuned
+                                                ? (constraints.maxWidth -
+                                                        _tuningBarWidth) /
+                                                    2
+                                                : (position *
+                                                    (constraints.maxWidth -
+                                                        _tuningBarWidth) /
+                                                    24),
+                                        child: _TuningBar(
+                                          isTuned: isTuned,
+                                          isStopped: isStopped,
+                                        ),
+                                      );
+                                    },
+                                    stopped: (data) {
+                                      if (data.lastPosition == null) {
+                                        return const SizedBox.shrink();
+                                      }
+
+                                      final position =
+                                          (rulerItems.length *
+                                              (data.lastPosition! + 1)) /
+                                          2;
+
+                                      return AnimatedPositioned(
+                                        duration: const Duration(
+                                          milliseconds: 100,
+                                        ),
+                                        left:
+                                            (position *
+                                                (constraints.maxWidth -
+                                                    _tuningBarWidth) /
+                                                24),
+                                        child: const _TuningBar(
+                                          isTuned: false,
+                                          isStopped: true,
+                                        ),
+                                      );
+                                    },
+                                    orElse: SizedBox.shrink,
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
               ),
-          builder: (context, state) {
-            return state.maybeMap(
-              initializing:
-                  (_) => const Center(child: CircularProgressIndicator()),
-              errorInitializing: (error) {
-                return ErrorWithRetryComponent(
-                  errorMessage: error.message,
-                  onRetry: context.read<TunerCubit>().reload,
-                );
-              },
-              unsupported: (_) {
-                return ErrorWithRetryComponent(
-                  errorMessage:
-                      'Unfortunately your device does not support this feature.',
-                  onRetry: context.read<TunerCubit>().reload,
-                );
-              },
-              orElse: () {
-                return BlocBuilder<TunerCubit, TunerState>(
-                  buildWhen:
-                      (previous, current) => current.maybeMap(
-                        initialized: (_) => true,
-                        tuning: (_) => true,
-                        stopped: (_) => true,
-                        orElse: () => false,
-                      ),
-                  builder: (context, state) {
-                    return Column(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.max,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                state.maybeMap(
-                                  orElse: () => '',
-                                  tuning: (data) => data.key,
-                                ),
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 90,
-                                ),
-                              ),
-                              const SizedBox(height: 30),
-                              ToneMeter(
-                                position: state.maybeMap(
-                                  tuning: (data) => data.position,
-                                  orElse: () => null,
-                                ),
-                                isTuned: state.maybeMap(
-                                  tuning: (data) => data.isTuned,
-                                  orElse: () => false,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 30),
-                        ElevatedButton(
-                          onPressed: () async {
-                            final cubit = context.read<TunerCubit>();
-
-                            await cubit.stopAudioCapture();
-
-                            if (!context.mounted) {
-                              return;
-                            }
-
-                            final calibrationOffset = await Navigator.of(
-                              context,
-                            ).push(
-                              MaterialPageRoute(
-                                builder:
-                                    (context) => const ToneCalibrationScreen(),
-                              ),
-                            );
-
-                            if (calibrationOffset is double) {
-                              cubit.setCalibration(calibrationOffset);
-                            }
-
-                            await cubit.startAudioCapture();
-                          },
-                          child: const Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.mic_rounded),
-                              SizedBox(width: 4),
-                              Text('Calibrate'),
-                            ],
-                          ),
-                        ),
-                      ],
-                    );
-                  },
-                );
-              },
-            );
-          },
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-class ToneMeter extends StatefulWidget {
-  const ToneMeter({super.key, required this.position, required this.isTuned});
+const _soundMeterWidth = 30.0;
 
-  final double? position;
-  final bool isTuned;
-
-  @override
-  State<ToneMeter> createState() => _ToneMeterState();
-}
-
-class _ToneMeterState extends State<ToneMeter> with TickerProviderStateMixin {
-  late final AnimationController _positionController;
-  late final AnimationController _opacityController;
-
-  @override
-  void initState() {
-    _positionController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 30),
-    );
-
-    _opacityController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 100),
-    );
-
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _positionController.dispose();
-
-    super.dispose();
-  }
-
-  @override
-  void didUpdateWidget(covariant ToneMeter oldWidget) {
-    super.didUpdateWidget(oldWidget);
-
-    if (widget.isTuned) {
-      _positionController.animateTo(
-        0.5,
-        duration: const Duration(milliseconds: 30),
-      );
-
-      _opacityController.animateTo(1);
-
-      return;
-    }
-
-    if (widget.position == null) {
-      _opacityController.animateTo(
-        0,
-        duration: const Duration(milliseconds: 500),
-      );
-
-      return;
-    }
-
-    _positionController.animateTo(
-      (widget.position! + 1) / 2,
-      duration: const Duration(milliseconds: 30),
-    );
-
-    _opacityController.animateTo(1);
-  }
+class _SoundMeter extends StatelessWidget {
+  const _SoundMeter();
 
   @override
   Widget build(BuildContext context) {
-    const meterHeight = 300.0;
-    const meterWidth = 30.0;
-
-    return Stack(
-      alignment: Alignment.center,
-      children: [
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 50 / 2),
-          child: Row(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _MeterLine(
-                meterHeight: meterHeight,
-                text: '-50c',
-                alignment: CrossAxisAlignment.start,
+    return BlocBuilder<TunerCubit, TunerState>(
+      builder: (context, state) {
+        return BlocBuilder<MeterCubit, MeterState>(
+          builder: (context, meterState) {
+            return Container(
+              width: _soundMeterWidth,
+              height: 60,
+              decoration: BoxDecoration(
+                color: Colors.white.withAlpha(100),
+                borderRadius: const BorderRadius.all(Radius.circular(50)),
               ),
-              _MeterLine(
-                meterHeight: meterHeight,
-                text: '+50c',
-                alignment: CrossAxisAlignment.end,
-              ),
-            ],
-          ),
-        ),
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final width = constraints.maxWidth;
-
-            return AnimatedBuilder(
-              animation: Listenable.merge([
-                _positionController,
-                _opacityController,
-              ]),
-              builder: (context, child) {
-                final left = _positionController.value * (width - meterWidth);
-
-                return SizedBox(
-                  height: meterHeight,
-                  child: Stack(
-                    children: [
-                      Positioned(
-                        left: left,
-                        child: Opacity(
-                          opacity: _opacityController.value,
-                          child: Container(
-                            height: meterHeight,
-                            width: meterWidth,
-                            decoration: BoxDecoration(
-                              color:
-                                  _positionController.value == 0.5
-                                      ? Colors.green
-                                      : Colors.deepOrange,
-
-                              borderRadius: const BorderRadius.all(
-                                Radius.circular(3),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+              clipBehavior: Clip.antiAlias,
+              child: Stack(
+                children: [
+                  Container(
+                    alignment: Alignment.topCenter,
+                    padding: const EdgeInsets.only(top: 8),
+                    child: const Icon(
+                      Icons.mic,
+                      color: Colors.white,
+                      applyTextScaling: false,
+                      size: _soundMeterWidth - 10,
+                    ),
                   ),
-                );
-              },
+                  AnimatedPositioned(
+                    duration: meterState.refreshRate,
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    height:
+                        meterState.maxDecibels == 0
+                            ? 0
+                            : (meterState.decibels / meterState.maxDecibels) *
+                                60,
+                    child: ColoredBox(
+                      color:
+                          meterState.decibels < state.tuningThresholdInDecibels
+                              ? Colors.white
+                              : state.maybeMap(
+                                tuning:
+                                    (data) =>
+                                        data.isTuned
+                                            ? _tunedColor
+                                            : _tuningColor,
+                                orElse: () => Colors.white,
+                              ),
+                    ),
+                  ),
+                ],
+              ),
             );
           },
-        ),
-        Center(
-          child: Container(
-            width: meterWidth + 4,
-            height: meterHeight + 4,
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: Colors.white.withAlpha(100),
-                width: 1,
-                style: BorderStyle.solid,
-              ),
-              borderRadius: const BorderRadius.all(Radius.circular(5)),
-            ),
-          ),
-        ),
-      ],
+        );
+      },
     );
   }
 }
 
-class _MeterLine extends StatelessWidget {
-  const _MeterLine({
-    required this.meterHeight,
-    required this.text,
-    required this.alignment,
-  });
+const _barWidth = 2.0;
+const _tuningBarWidth = _barWidth * 2;
+final _barColor = Colors.white.withValues(alpha: 0.3);
+const _tuningColor = Colors.deepOrangeAccent;
+const _tunedColor = Colors.greenAccent;
 
-  final double meterHeight;
-  final String text;
-  final CrossAxisAlignment alignment;
+class _TuningBar extends StatelessWidget {
+  const _TuningBar({required this.isTuned, required this.isStopped});
+
+  final bool isTuned;
+  final bool isStopped;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: meterHeight,
-      child: Column(
-        crossAxisAlignment: alignment,
-        children: [
-          Text(
-            text,
-            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 100),
+      height: isTuned ? 300 : 200,
+      width: _tuningBarWidth,
+      decoration: BoxDecoration(
+        color:
+            isStopped
+                ? Colors.transparent
+                : (isTuned ? _tunedColor : _tuningColor),
+        borderRadius: const BorderRadius.all(Radius.circular(_barWidth)),
+      ),
+    );
+  }
+}
+
+const _barMaxHeight = 200.0;
+
+class _SmallBar extends StatelessWidget {
+  const _SmallBar();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<TunerCubit, TunerState>(
+      buildWhen:
+          (previous, current) =>
+              current.maybeMap(
+                tuning: (data) => data.isTuned,
+                orElse: () => null,
+              ) !=
+              previous.maybeMap(
+                tuning: (data) => data.isTuned,
+                orElse: () => null,
+              ),
+      builder: (context, state) {
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 100),
+          height: _barMaxHeight / 3,
+          width: _barWidth,
+          decoration: BoxDecoration(
+            color:
+                state.mapOrNull(
+                  tuning: (data) => data.isTuned ? _tunedColor : _barColor,
+                ) ??
+                _barColor,
+            borderRadius: const BorderRadius.all(Radius.circular(_barWidth)),
           ),
-          Container(height: 10),
-          Expanded(
-            child: Container(width: 1, color: Colors.white.withAlpha(60)),
+        );
+      },
+    );
+  }
+}
+
+class _MediumBar extends StatelessWidget {
+  const _MediumBar();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<TunerCubit, TunerState>(
+      buildWhen:
+          (previous, current) =>
+              current.maybeMap(
+                tuning: (data) => data.isTuned,
+                orElse: () => null,
+              ) !=
+              previous.maybeMap(
+                tuning: (data) => data.isTuned,
+                orElse: () => null,
+              ),
+      builder: (context, state) {
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 100),
+          height: _barMaxHeight * 0.75,
+          width: _barWidth,
+          decoration: BoxDecoration(
+            color:
+                state.mapOrNull(
+                  tuning: (data) => data.isTuned ? _tunedColor : _barColor,
+                ) ??
+                _barColor,
+            borderRadius: const BorderRadius.all(Radius.circular(_barWidth)),
           ),
-        ],
+        );
+      },
+    );
+  }
+}
+
+class _LargeBar extends StatelessWidget {
+  const _LargeBar();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: _barMaxHeight,
+      width: _barWidth,
+      decoration: BoxDecoration(
+        color: _barColor,
+        borderRadius: const BorderRadius.all(Radius.circular(_barWidth)),
       ),
     );
   }

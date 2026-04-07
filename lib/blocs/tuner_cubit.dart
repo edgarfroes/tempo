@@ -1,192 +1,67 @@
-import 'dart:typed_data';
-
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:tempo/entities/audio_listener.dart';
+import 'package:tempo/entities/note_interval.dart';
 import 'package:tempo/locator.dart';
-import 'package:tempo/services/audio_capture/audio_capture_service.dart';
-import 'package:tempo/services/pitch_detector/pitch_detector_service.dart';
+import 'package:tempo/repositories/audio_capture/audio_capture_repository.dart';
+import 'package:tempo/repositories/sound_repository.dart';
 
 part 'tuner_cubit.freezed.dart';
 
 class TunerCubit extends Cubit<TunerState> {
-  TunerCubit() : super(const TunerState.initializing()) {
+  TunerCubit({double tuningThresholdInDecibels = 40.0})
+    : _tuningThresholdInDecibels = tuningThresholdInDecibels,
+      super(
+        TunerState.initializing(
+          tuningThresholdInDecibels: tuningThresholdInDecibels,
+        ),
+      ) {
     _initialize();
   }
 
-  var _calibrationOffset = 0.0;
+  final _audioCaptureRepository = locator.get<AudioCaptureRepository>();
+  final _soundRepository = locator.get<SoundRepository>();
 
-  final _audioCaptureService = locator.get<AudioCaptureService>();
-  final _pitchDetectorService = locator.get<PitchDetectorService>();
+  final _tones = <NoteInterval>[];
 
-  final chromaticFrequencies = <double>[
-    16.35,
-    17.32,
-    18.35,
-    19.45,
-    20.60,
-    21.83,
-    23.12,
-    24.50,
-    25.96,
-    27.50,
-    29.14,
-    30.87,
-    32.70,
-    34.65,
-    36.71,
-    38.89,
-    41.20,
-    43.65,
-    46.25,
-    49.00,
-    51.91,
-    55.00,
-    58.27,
-    61.74,
-    65.41,
-    69.30,
-    73.42,
-    77.78,
-    82.41,
-    87.31,
-    92.50,
-    98.00,
-    103.83,
-    110.00,
-    116.54,
-    123.47,
-    130.81,
-    138.59,
-    146.83,
-    155.56,
-    164.81,
-    174.61,
-    185.00,
-    196.00,
-    207.65,
-    220.00,
-    233.08,
-    246.94,
-    261.63,
-    277.18,
-    293.66,
-    311.13,
-    329.63,
-    349.23,
-    369.99,
-    392.00,
-    415.30,
-    440.00,
-    466.16,
-    493.88,
-    523.25,
-    554.37,
-    587.33,
-    622.25,
-    659.25,
-    698.46,
-    739.99,
-    783.99,
-    830.61,
-    880.00,
-    932.33,
-    987.77,
-    1046.50,
-    1108.73,
-    1174.66,
-    1244.51,
-    1318.51,
-    1396.91,
-    1479.98,
-    1567.98,
-    1661.22,
-    1760.00,
-    1864.66,
-    1975.53,
-    2093.00,
-    2217.46,
-    2349.32,
-    2489.02,
-    2637.02,
-    2793.83,
-    2959.96,
-    3135.96,
-    3322.44,
-    3520.00,
-    3729.31,
-    3951.07,
-    4186.01,
-    4434.92,
-    4698.63,
-    4978.03,
-    5274.04,
-    5587.65,
-    5919.91,
-    6271.93,
-    6644.88,
-    7040.00,
-    7458.62,
-    7902.13,
-  ];
-
-  final intervals = <_TuneInterval>[];
+  double? _calibrationOffset;
+  double _currentDecibels = 0.0;
+  final double _tuningThresholdInDecibels;
+  bool _pauseTuning = false;
 
   Future<void> reload() => _initialize();
 
   Future<void> _initialize() async {
     try {
-      if (!_audioCaptureService.isSupported) {
-        emit(const TunerState.unsupported());
+      if (!_audioCaptureRepository.isSupported) {
+        emit(
+          TunerState.unsupported(
+            tuningThresholdInDecibels: _tuningThresholdInDecibels,
+          ),
+        );
 
         return;
       }
 
-      for (var i = 0; i < chromaticFrequencies.length; i++) {
-        final mod = i % 12;
+      _calibrationOffset = await _soundRepository.getCalibrationOffset();
 
-        final tune = switch (mod) {
-          0 => 'C',
-          1 => 'C#',
-          2 => 'D',
-          3 => 'D#',
-          4 => 'E',
-          5 => 'F',
-          6 => 'F#',
-          7 => 'G',
-          8 => 'G#',
-          9 => 'A',
-          10 => 'A#',
-          11 => 'B',
-          _ => '',
-        };
+      _tones
+        ..clear()
+        ..addAll(_soundRepository.getNotesIntervals());
 
-        final frequency = chromaticFrequencies[i];
+      _audioCaptureRepository
+        ..addListener(_audioListener)
+        ..addListener(_meterListener);
 
-        final lowerLimit =
-            i == 0
-                ? frequency - ((chromaticFrequencies[i + 1] - frequency) / 2)
-                : frequency - ((frequency - chromaticFrequencies[i - 1]) / 2);
-
-        final upperLimit =
-            i == chromaticFrequencies.length - 1
-                ? frequency + ((frequency - chromaticFrequencies[i - 1]) / 2)
-                : frequency + ((chromaticFrequencies[i + 1] - frequency) / 2);
-
-        intervals.add(
-          _TuneInterval(
-            key: tune,
-            octave: (i / 12).floor(),
-            frequency: frequency,
-            lowerLimit: lowerLimit,
-            upperLimit: upperLimit,
-          ),
-        );
-      }
-
-      await startAudioCapture();
+      emit(
+        TunerState.initialized(
+          tuningThresholdInDecibels: _tuningThresholdInDecibels,
+        ),
+      );
     } on Exception {
       emit(
-        const TunerState.errorInitializing(
+        TunerState.errorInitializing(
+          tuningThresholdInDecibels: _tuningThresholdInDecibels,
           message: 'Error initializing tuner, try again',
         ),
       );
@@ -194,113 +69,168 @@ class TunerCubit extends Cubit<TunerState> {
   }
 
   var _tuningLoop = 0;
+  NoteInterval? _lastKnownNoteInterval;
+  double? _lastKnownPosition;
 
-  Future<void> _audioListener(Float32List obj) async {
-    final buffer = Float64List.fromList(obj.cast<double>());
+  late final _meterListener = AudioListener.meter(
+    listener: (decibels) {
+      _currentDecibels = decibels;
+    },
+    onError: _onCaptureError,
+  );
 
-    final pitch =
-        (await _pitchDetectorService.getPitchFromFloatBuffer(buffer)) +
-        _calibrationOffset;
+  TunerState get _stoppedState => TunerState.stopped(
+    calibrationOffset: _calibrationOffset,
+    tuningThresholdInDecibels: _tuningThresholdInDecibels,
+    lastKey: _lastKnownNoteInterval?.key,
+    lastOctave: _lastKnownNoteInterval?.octave,
+    lastPosition: _lastKnownPosition,
+  );
 
-    if (pitch < chromaticFrequencies[0]) {
-      final stoppedAt = _tuningLoop;
-
-      if (_tuningLoop == stoppedAt) {
-        emit(const TunerState.stopped());
+  late final _audioListener = AudioListener.capture(
+    listener: (buffer) async {
+      if (isClosed) {
+        return;
       }
 
-      return;
-    }
+      if (_pauseTuning) {
+        return;
+      }
 
-    _tuningLoop += 1;
+      if (_currentDecibels < _tuningThresholdInDecibels) {
+        emit(_stoppedState);
+        return;
+      }
 
-    // Get the closest frequency
-    final closestFrequency =
-        intervals
-            .where((x) => pitch >= x.lowerLimit && pitch <= x.upperLimit)
-            .firstOrNull;
+      final pitch =
+          (await _soundRepository.getPitchFromFloatBuffer(buffer)) +
+          (_calibrationOffset ?? 0.0);
 
-    if (closestFrequency == null) {
-      emit(const TunerState.stopped());
-      return;
-    }
+      if (pitch < _tones[0].frequency) {
+        final stoppedAt = _tuningLoop;
 
-    // -1 is the lowerLimit.
-    // 0 is in the middle (on tone).
-    // 1 is the upperLimit.
-    // position should take pitch and generate a value between -1 and 1
-    final position =
-        (pitch - closestFrequency.lowerLimit) /
-            (closestFrequency.upperLimit - closestFrequency.lowerLimit) *
-            2 -
-        1;
+        if (_tuningLoop == stoppedAt) {
+          emit(_stoppedState);
+        }
 
-    final isWithinTuningTolerance = position > -0.01 && position < 0.01;
+        return;
+      }
 
-    // TODO: If is within tolerance, add a haptic feedback.
+      _tuningLoop += 1;
 
-    emit(
-      TunerState.tuning(
-        key: closestFrequency.key,
-        octave: closestFrequency.octave,
-        position: position,
-        isTuned: isWithinTuningTolerance,
-      ),
-    );
+      // Get the closest frequency
+      final closestFrequency =
+          _tones
+              .where((x) => pitch >= x.lowerLimit && pitch <= x.upperLimit)
+              .firstOrNull;
+
+      if (closestFrequency == null) {
+        emit(_stoppedState);
+
+        return;
+      }
+
+      _lastKnownNoteInterval = closestFrequency;
+
+      // -1 is the lowerLimit.
+      // 0 is in the middle (on tone).
+      // 1 is the upperLimit.
+      // position should take pitch and generate a value between -1 and 1
+      final position =
+          (pitch - closestFrequency.lowerLimit) /
+              (closestFrequency.upperLimit - closestFrequency.lowerLimit) *
+              2 -
+          1;
+
+      _lastKnownPosition = position;
+
+      const tolerance = 0.2;
+
+      final isTuned = position > -tolerance && position < tolerance;
+
+      if (isTuned) {
+        _pauseTuning = true;
+      }
+
+      Future.delayed(const Duration(seconds: 1), () {
+        if (isClosed) {
+          return;
+        }
+
+        _pauseTuning = false;
+      });
+
+      emit(
+        TunerState.tuning(
+          key: closestFrequency.key,
+          octave: closestFrequency.octave,
+          position: position,
+          isTuned: isTuned,
+          calibrationOffset: _calibrationOffset,
+          tuningThresholdInDecibels: _tuningThresholdInDecibels,
+        ),
+      );
+    },
+    onError: _onCaptureError,
+  );
+
+  Future<void> updateCalibration() async {
+    _calibrationOffset = await _soundRepository.getCalibrationOffset() ?? 0.0;
+
+    emit(_stoppedState);
   }
 
-  void setCalibration(double offset) {
-    _calibrationOffset = offset;
+  Future<void> clearCalibration() async {
+    await _soundRepository.clearCalibrationOffset();
 
-    emit(const TunerState.stopped());
+    _calibrationOffset = null;
+
+    emit(_stoppedState);
   }
 
   void _onCaptureError(Object e) {
+    // TODO.
     print(e);
   }
 
-  Future<void> stopAudioCapture() async {
-    await _audioCaptureService.stop();
-  }
+  @override
+  Future<void> close() async {
+    _audioCaptureRepository
+      ..removeListener(_audioListener)
+      ..removeListener(_meterListener);
 
-  Future<void> startAudioCapture() async {
-    await _audioCaptureService.start(
-      listener: _audioListener,
-      onError: _onCaptureError,
-    );
-
-    emit(const TunerState.initialized());
+    await super.close();
   }
 }
 
 @freezed
 abstract class TunerState with _$TunerState {
-  const factory TunerState.initializing() = _Initializing;
-  const factory TunerState.unsupported() = _Unsupported;
-  const factory TunerState.initialized() = _Initialized;
-  const factory TunerState.stopped() = _Stopped;
-  const factory TunerState.errorInitializing({required String message}) =
-      _ErrorInitializing;
+  const factory TunerState.initializing({
+    required double tuningThresholdInDecibels,
+  }) = _Initializing;
+  const factory TunerState.unsupported({
+    required double tuningThresholdInDecibels,
+  }) = _Unsupported;
+  const factory TunerState.initialized({
+    required double tuningThresholdInDecibels,
+  }) = _Initialized;
+  const factory TunerState.stopped({
+    required double? calibrationOffset,
+    required double tuningThresholdInDecibels,
+    int? lastOctave,
+    String? lastKey,
+    double? lastPosition,
+  }) = _Stopped;
+  const factory TunerState.errorInitializing({
+    required double tuningThresholdInDecibels,
+    required String message,
+  }) = _ErrorInitializing;
   const factory TunerState.tuning({
     required String key,
     required int octave,
     required double position,
     required bool isTuned,
+    required double? calibrationOffset,
+    required double tuningThresholdInDecibels,
   }) = _Tuning;
-}
-
-class _TuneInterval {
-  _TuneInterval({
-    required this.key,
-    required this.octave,
-    required this.frequency,
-    required this.lowerLimit,
-    required this.upperLimit,
-  });
-
-  final String key;
-  final int octave;
-  final double frequency;
-  final double lowerLimit;
-  final double upperLimit;
 }

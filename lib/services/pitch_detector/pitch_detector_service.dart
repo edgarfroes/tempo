@@ -8,8 +8,7 @@ abstract class PitchDetectorService {
   final int sampleRate;
   final int bufferSize;
 
-  Future<double> getPitchFromFloatBuffer(Float64List buffer);
-  void calibrate(double offset);
+  Future<double> getPitchFromFloatBuffer(Float32List buffer);
 }
 
 final class PitchDetectorServiceImpl extends PitchDetectorService {
@@ -19,19 +18,12 @@ final class PitchDetectorServiceImpl extends PitchDetectorService {
   });
 
   @override
-  Future<double> getPitchFromFloatBuffer(Float64List buffer) async {
+  Future<double> getPitchFromFloatBuffer(Float32List buffer) async {
     final detection = (await PitchDetector(
       audioSampleRate: sampleRate * 0.1,
       bufferSize: bufferSize,
     ).getPitchFromFloatBuffer(buffer));
 
-    return (detection.pitch * (detection.pitched ? 10 : 1)) + _offset;
-  }
-
-  double _offset = 0;
-
-  @override
-  void calibrate(double offset) {
-    _offset = offset;
+    return (detection.pitch * (detection.pitched ? 10 : 1));
   }
 }

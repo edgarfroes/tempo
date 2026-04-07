@@ -13,7 +13,7 @@ final class AudioPlayerServiceImpl implements AudioPlayerService {
   final List<_AudioPlayerInstance> _instances = [];
 
   _AudioPlayerInstance _getPlayerInstance(AudioPlayerSource source) {
-    final indexId = _instances.indexWhere((x) => x.source == source);
+    final indexId = _instances.indexWhere((x) => x._source == source);
 
     if (indexId != -1) {
       return _instances[indexId];
@@ -46,7 +46,7 @@ final class AudioPlayerServiceImpl implements AudioPlayerService {
   @override
   Future<void> dispose({AudioPlayerSource? source}) async {
     if (source != null) {
-      final indexId = _instances.indexWhere((x) => x.source == source);
+      final indexId = _instances.indexWhere((x) => x._source == source);
 
       if (indexId != -1) {
         final player = _instances[indexId];
@@ -71,13 +71,17 @@ abstract class AudioPlayerSource with _$AudioPlayerSource {
 }
 
 class _AudioPlayerInstance {
-  final AudioPlayer player;
-  final AudioPlayerSource source;
+  final AudioPlayer _player;
+  final AudioPlayerSource _source;
 
-  _AudioPlayerInstance({required this.player, required this.source});
+  _AudioPlayerInstance({
+    required AudioPlayer player,
+    required AudioPlayerSource source,
+  }) : _source = source,
+       _player = player;
 
   Future<void> play({double? volume}) async {
-    final source = this.source.map(
+    final source = _source.map(
       asset: (data) {
         assert(data.path.isNotEmpty, 'Asset path cannot be empty');
 
@@ -91,16 +95,15 @@ class _AudioPlayerInstance {
       },
     );
 
-    await player.play(source, volume: volume);
+    await _player.play(source, volume: volume, position: Duration.zero);
   }
 
   Future<void> stop() async {
-    await player.stop();
+    await _player.stop();
   }
 
   Future<void> dispose() async {
-    await player.stop();
-    await player.release();
-    await player.dispose();
+    await _player.stop();
+    await _player.release();
   }
 }

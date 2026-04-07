@@ -5,14 +5,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tempo/blocs/permission_cubit.dart';
 import 'package:tempo/blocs/tone_calibration_cubit.dart';
 import 'package:tempo/components/error_with_retry_component.dart';
-import 'package:tempo/components/permission_wrapper_component.dart';
+import 'package:tempo/components/permission_wrapper.dart';
 
 class ToneCalibrationScreen extends StatelessWidget {
   const ToneCalibrationScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return PermissionWrapperComponent(
+    return PermissionWrapper(
       permission: Permission.microphone(),
       grantedBuilder: (context) => const _Calibrator(),
     );
@@ -134,6 +134,12 @@ class _Calibrating extends StatelessWidget {
                         calibrating: () => true,
                         orElse: () => false,
                       ),
+                    ),
+                    state.maybeWhen(
+                      orElse: SizedBox.shrink,
+                      calibrated:
+                          (offset) =>
+                              Text('${offset.toStringAsPrecision(3)} cents'),
                     ),
                   ],
                 );
@@ -406,6 +412,7 @@ class _AutoDottedTextState extends State<_AutoDottedText> {
     final style = Theme.of(context).textTheme.titleLarge;
 
     return Text.rich(
+      textAlign: TextAlign.center,
       TextSpan(
         children: [
           TextSpan(

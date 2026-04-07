@@ -3,11 +3,11 @@ import 'dart:typed_data';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:tempo/gen/assets.gen.dart';
+import 'package:tempo/entities/audio_listener.dart';
 import 'package:tempo/locator.dart';
-import 'package:tempo/services/audio_capture/audio_capture_service.dart';
-import 'package:tempo/services/audio_player/audio_player_service.dart';
-import 'package:tempo/services/pitch_detector/pitch_detector_service.dart';
+import 'package:tempo/repositories/audio_capture/audio_capture_repository.dart';
+import 'package:tempo/repositories/audio_player_repository.dart';
+import 'package:tempo/repositories/sound_repository.dart';
 
 part 'tone_calibration_cubit.freezed.dart';
 
@@ -18,18 +18,14 @@ class ToneCalibrationCubit extends Cubit<ToneCalibrationState> {
 
   final _capturedFrequencies = <double>[];
 
-  final _audioCaptureService = locator.get<AudioCaptureService>();
-  final _pitchDetectorService = locator.get<PitchDetectorService>();
-  final _player = locator.get<AudioPlayerService>();
-  final _a1kHzHzFrequencyAudioSource = AudioPlayerSource.asset(
-    Assets.frequencies.a1kHz,
-  );
-  final _frequency = 1000.0;
+  final _audioCaptureRepository = locator.get<AudioCaptureRepository>();
+  final _soundRepository = locator.get<SoundRepository>();
+  final _audioPlayerRepository = locator.get<AudioPlayerRepository>();
   final _minimumRequiredData = 30;
 
   @override
   Future<void> close() async {
-    await _player.dispose(source: _a1kHzHzFrequencyAudioSource);
+    await _audioPlayerRepository.dispose1kHzTone();
 
     return super.close();
   }
@@ -40,7 +36,7 @@ class ToneCalibrationCubit extends Cubit<ToneCalibrationState> {
     try {
       emit(const ToneCalibrationState.initializing());
 
-      if (!_audioCaptureService.isSupported) {
+      if (!_audioCaptureRepository.isSupported) {
         emit(const ToneCalibrationState.unsupported());
 
         return;
@@ -56,10 +52,8 @@ class ToneCalibrationCubit extends Cubit<ToneCalibrationState> {
     }
   }
 
-  Future<void> _audioListener(Float32List obj) async {
-    final buffer = Float64List.fromList(obj.cast<double>());
-
-    final pitch = await _pitchDetectorService.getPitchFromFloatBuffer(buffer);
+  Future<void> _audioListener(Float32List buffer) async {
+    final pitch = await _soundRepository.getPitchFromFloatBuffer(buffer);
 
     stdout.write('Pitch calibration: $pitch...\r');
 
@@ -82,22 +76,24 @@ class ToneCalibrationCubit extends Cubit<ToneCalibrationState> {
 
   Future<void> startCalibration() async {
     try {
-      await _audioCaptureService.start(
+      final listener = AudioListener.capture(
         listener: _audioListener,
         onError: _onCaptureError,
       );
+
+      _audioCaptureRepository.addListener(listener);
 
       _capturedFrequencies.clear();
 
       emit(const ToneCalibrationState.calibrating());
 
-      await _player.play(_a1kHzHzFrequencyAudioSource, volume: 1);
+      await _audioPlayerRepository.play1kHzTone();
 
       await Future.delayed(const Duration(seconds: 5));
 
-      await _player.stop(_a1kHzHzFrequencyAudioSource);
+      await _audioPlayerRepository.stop1kHzTone();
 
-      await _audioCaptureService.stop();
+      _audioCaptureRepository.removeListener(listener);
 
       emit(const ToneCalibrationState.analyzing());
 
@@ -106,9 +102,11 @@ class ToneCalibrationCubit extends Cubit<ToneCalibrationState> {
         return;
       }
 
+      const frequency = 1000.0;
+
       final usableData =
           _capturedFrequencies
-              .where((x) => x > _frequency - 10 && x < _frequency + 10)
+              .where((x) => x > frequency - 10 && x < frequency + 10)
               .toList();
 
       if (usableData.length < _capturedFrequencies.length * 0.7) {
@@ -117,9 +115,9 @@ class ToneCalibrationCubit extends Cubit<ToneCalibrationState> {
       }
 
       final offset =
-          _frequency - (usableData.reduce((a, b) => a + b) / usableData.length);
+          frequency - (usableData.reduce((a, b) => a + b) / usableData.length);
 
-      _pitchDetectorService.calibrate(offset);
+      await _soundRepository.saveCalibrationOffset(offset);
 
       // Fake delay for UI feedback;
       await Future.delayed(const Duration(seconds: 1));

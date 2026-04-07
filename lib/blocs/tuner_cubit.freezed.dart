@@ -14,30 +14,61 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$TunerState {
 
-
+ double get tuningThresholdInDecibels;
+/// Create a copy of TunerState
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$TunerStateCopyWith<TunerState> get copyWith => _$TunerStateCopyWithImpl<TunerState>(this as TunerState, _$identity);
 
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is TunerState);
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is TunerState&&(identical(other.tuningThresholdInDecibels, tuningThresholdInDecibels) || other.tuningThresholdInDecibels == tuningThresholdInDecibels));
 }
 
 
 @override
-int get hashCode => runtimeType.hashCode;
+int get hashCode => Object.hash(runtimeType,tuningThresholdInDecibels);
 
 @override
 String toString() {
-  return 'TunerState()';
+  return 'TunerState(tuningThresholdInDecibels: $tuningThresholdInDecibels)';
 }
 
 
 }
 
 /// @nodoc
-class $TunerStateCopyWith<$Res>  {
-$TunerStateCopyWith(TunerState _, $Res Function(TunerState) __);
+abstract mixin class $TunerStateCopyWith<$Res>  {
+  factory $TunerStateCopyWith(TunerState value, $Res Function(TunerState) _then) = _$TunerStateCopyWithImpl;
+@useResult
+$Res call({
+ double tuningThresholdInDecibels
+});
+
+
+
+
+}
+/// @nodoc
+class _$TunerStateCopyWithImpl<$Res>
+    implements $TunerStateCopyWith<$Res> {
+  _$TunerStateCopyWithImpl(this._self, this._then);
+
+  final TunerState _self;
+  final $Res Function(TunerState) _then;
+
+/// Create a copy of TunerState
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? tuningThresholdInDecibels = null,}) {
+  return _then(_self.copyWith(
+tuningThresholdInDecibels: null == tuningThresholdInDecibels ? _self.tuningThresholdInDecibels : tuningThresholdInDecibels // ignore: cast_nullable_to_non_nullable
+as double,
+  ));
+}
+
 }
 
 
@@ -134,15 +165,15 @@ return tuning(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initializing,TResult Function()?  unsupported,TResult Function()?  initialized,TResult Function()?  stopped,TResult Function( String message)?  errorInitializing,TResult Function( String key,  int octave,  double position,  bool isTuned)?  tuning,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( double tuningThresholdInDecibels)?  initializing,TResult Function( double tuningThresholdInDecibels)?  unsupported,TResult Function( double tuningThresholdInDecibels)?  initialized,TResult Function( double? calibrationOffset,  double tuningThresholdInDecibels,  int? lastOctave,  String? lastKey,  double? lastPosition)?  stopped,TResult Function( double tuningThresholdInDecibels,  String message)?  errorInitializing,TResult Function( String key,  int octave,  double position,  bool isTuned,  double? calibrationOffset,  double tuningThresholdInDecibels)?  tuning,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initializing() when initializing != null:
-return initializing();case _Unsupported() when unsupported != null:
-return unsupported();case _Initialized() when initialized != null:
-return initialized();case _Stopped() when stopped != null:
-return stopped();case _ErrorInitializing() when errorInitializing != null:
-return errorInitializing(_that.message);case _Tuning() when tuning != null:
-return tuning(_that.key,_that.octave,_that.position,_that.isTuned);case _:
+return initializing(_that.tuningThresholdInDecibels);case _Unsupported() when unsupported != null:
+return unsupported(_that.tuningThresholdInDecibels);case _Initialized() when initialized != null:
+return initialized(_that.tuningThresholdInDecibels);case _Stopped() when stopped != null:
+return stopped(_that.calibrationOffset,_that.tuningThresholdInDecibels,_that.lastOctave,_that.lastKey,_that.lastPosition);case _ErrorInitializing() when errorInitializing != null:
+return errorInitializing(_that.tuningThresholdInDecibels,_that.message);case _Tuning() when tuning != null:
+return tuning(_that.key,_that.octave,_that.position,_that.isTuned,_that.calibrationOffset,_that.tuningThresholdInDecibels);case _:
   return orElse();
 
 }
@@ -160,15 +191,15 @@ return tuning(_that.key,_that.octave,_that.position,_that.isTuned);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initializing,required TResult Function()  unsupported,required TResult Function()  initialized,required TResult Function()  stopped,required TResult Function( String message)  errorInitializing,required TResult Function( String key,  int octave,  double position,  bool isTuned)  tuning,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( double tuningThresholdInDecibels)  initializing,required TResult Function( double tuningThresholdInDecibels)  unsupported,required TResult Function( double tuningThresholdInDecibels)  initialized,required TResult Function( double? calibrationOffset,  double tuningThresholdInDecibels,  int? lastOctave,  String? lastKey,  double? lastPosition)  stopped,required TResult Function( double tuningThresholdInDecibels,  String message)  errorInitializing,required TResult Function( String key,  int octave,  double position,  bool isTuned,  double? calibrationOffset,  double tuningThresholdInDecibels)  tuning,}) {final _that = this;
 switch (_that) {
 case _Initializing():
-return initializing();case _Unsupported():
-return unsupported();case _Initialized():
-return initialized();case _Stopped():
-return stopped();case _ErrorInitializing():
-return errorInitializing(_that.message);case _Tuning():
-return tuning(_that.key,_that.octave,_that.position,_that.isTuned);case _:
+return initializing(_that.tuningThresholdInDecibels);case _Unsupported():
+return unsupported(_that.tuningThresholdInDecibels);case _Initialized():
+return initialized(_that.tuningThresholdInDecibels);case _Stopped():
+return stopped(_that.calibrationOffset,_that.tuningThresholdInDecibels,_that.lastOctave,_that.lastKey,_that.lastPosition);case _ErrorInitializing():
+return errorInitializing(_that.tuningThresholdInDecibels,_that.message);case _Tuning():
+return tuning(_that.key,_that.octave,_that.position,_that.isTuned,_that.calibrationOffset,_that.tuningThresholdInDecibels);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -185,15 +216,15 @@ return tuning(_that.key,_that.octave,_that.position,_that.isTuned);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initializing,TResult? Function()?  unsupported,TResult? Function()?  initialized,TResult? Function()?  stopped,TResult? Function( String message)?  errorInitializing,TResult? Function( String key,  int octave,  double position,  bool isTuned)?  tuning,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( double tuningThresholdInDecibels)?  initializing,TResult? Function( double tuningThresholdInDecibels)?  unsupported,TResult? Function( double tuningThresholdInDecibels)?  initialized,TResult? Function( double? calibrationOffset,  double tuningThresholdInDecibels,  int? lastOctave,  String? lastKey,  double? lastPosition)?  stopped,TResult? Function( double tuningThresholdInDecibels,  String message)?  errorInitializing,TResult? Function( String key,  int octave,  double position,  bool isTuned,  double? calibrationOffset,  double tuningThresholdInDecibels)?  tuning,}) {final _that = this;
 switch (_that) {
 case _Initializing() when initializing != null:
-return initializing();case _Unsupported() when unsupported != null:
-return unsupported();case _Initialized() when initialized != null:
-return initialized();case _Stopped() when stopped != null:
-return stopped();case _ErrorInitializing() when errorInitializing != null:
-return errorInitializing(_that.message);case _Tuning() when tuning != null:
-return tuning(_that.key,_that.octave,_that.position,_that.isTuned);case _:
+return initializing(_that.tuningThresholdInDecibels);case _Unsupported() when unsupported != null:
+return unsupported(_that.tuningThresholdInDecibels);case _Initialized() when initialized != null:
+return initialized(_that.tuningThresholdInDecibels);case _Stopped() when stopped != null:
+return stopped(_that.calibrationOffset,_that.tuningThresholdInDecibels,_that.lastOctave,_that.lastKey,_that.lastPosition);case _ErrorInitializing() when errorInitializing != null:
+return errorInitializing(_that.tuningThresholdInDecibels,_that.message);case _Tuning() when tuning != null:
+return tuning(_that.key,_that.octave,_that.position,_that.isTuned,_that.calibrationOffset,_that.tuningThresholdInDecibels);case _:
   return null;
 
 }
@@ -205,142 +236,287 @@ return tuning(_that.key,_that.octave,_that.position,_that.isTuned);case _:
 
 
 class _Initializing implements TunerState {
-  const _Initializing();
+  const _Initializing({required this.tuningThresholdInDecibels});
   
 
+@override final  double tuningThresholdInDecibels;
 
-
+/// Create a copy of TunerState
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$InitializingCopyWith<_Initializing> get copyWith => __$InitializingCopyWithImpl<_Initializing>(this, _$identity);
 
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Initializing);
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Initializing&&(identical(other.tuningThresholdInDecibels, tuningThresholdInDecibels) || other.tuningThresholdInDecibels == tuningThresholdInDecibels));
 }
 
 
 @override
-int get hashCode => runtimeType.hashCode;
+int get hashCode => Object.hash(runtimeType,tuningThresholdInDecibels);
 
 @override
 String toString() {
-  return 'TunerState.initializing()';
+  return 'TunerState.initializing(tuningThresholdInDecibels: $tuningThresholdInDecibels)';
 }
 
 
 }
 
+/// @nodoc
+abstract mixin class _$InitializingCopyWith<$Res> implements $TunerStateCopyWith<$Res> {
+  factory _$InitializingCopyWith(_Initializing value, $Res Function(_Initializing) _then) = __$InitializingCopyWithImpl;
+@override @useResult
+$Res call({
+ double tuningThresholdInDecibels
+});
 
 
+
+
+}
+/// @nodoc
+class __$InitializingCopyWithImpl<$Res>
+    implements _$InitializingCopyWith<$Res> {
+  __$InitializingCopyWithImpl(this._self, this._then);
+
+  final _Initializing _self;
+  final $Res Function(_Initializing) _then;
+
+/// Create a copy of TunerState
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? tuningThresholdInDecibels = null,}) {
+  return _then(_Initializing(
+tuningThresholdInDecibels: null == tuningThresholdInDecibels ? _self.tuningThresholdInDecibels : tuningThresholdInDecibels // ignore: cast_nullable_to_non_nullable
+as double,
+  ));
+}
+
+
+}
 
 /// @nodoc
 
 
 class _Unsupported implements TunerState {
-  const _Unsupported();
+  const _Unsupported({required this.tuningThresholdInDecibels});
   
 
+@override final  double tuningThresholdInDecibels;
 
-
+/// Create a copy of TunerState
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$UnsupportedCopyWith<_Unsupported> get copyWith => __$UnsupportedCopyWithImpl<_Unsupported>(this, _$identity);
 
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Unsupported);
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Unsupported&&(identical(other.tuningThresholdInDecibels, tuningThresholdInDecibels) || other.tuningThresholdInDecibels == tuningThresholdInDecibels));
 }
 
 
 @override
-int get hashCode => runtimeType.hashCode;
+int get hashCode => Object.hash(runtimeType,tuningThresholdInDecibels);
 
 @override
 String toString() {
-  return 'TunerState.unsupported()';
+  return 'TunerState.unsupported(tuningThresholdInDecibels: $tuningThresholdInDecibels)';
 }
 
 
 }
 
+/// @nodoc
+abstract mixin class _$UnsupportedCopyWith<$Res> implements $TunerStateCopyWith<$Res> {
+  factory _$UnsupportedCopyWith(_Unsupported value, $Res Function(_Unsupported) _then) = __$UnsupportedCopyWithImpl;
+@override @useResult
+$Res call({
+ double tuningThresholdInDecibels
+});
 
 
+
+
+}
+/// @nodoc
+class __$UnsupportedCopyWithImpl<$Res>
+    implements _$UnsupportedCopyWith<$Res> {
+  __$UnsupportedCopyWithImpl(this._self, this._then);
+
+  final _Unsupported _self;
+  final $Res Function(_Unsupported) _then;
+
+/// Create a copy of TunerState
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? tuningThresholdInDecibels = null,}) {
+  return _then(_Unsupported(
+tuningThresholdInDecibels: null == tuningThresholdInDecibels ? _self.tuningThresholdInDecibels : tuningThresholdInDecibels // ignore: cast_nullable_to_non_nullable
+as double,
+  ));
+}
+
+
+}
 
 /// @nodoc
 
 
 class _Initialized implements TunerState {
-  const _Initialized();
+  const _Initialized({required this.tuningThresholdInDecibels});
   
 
+@override final  double tuningThresholdInDecibels;
 
-
+/// Create a copy of TunerState
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$InitializedCopyWith<_Initialized> get copyWith => __$InitializedCopyWithImpl<_Initialized>(this, _$identity);
 
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Initialized);
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Initialized&&(identical(other.tuningThresholdInDecibels, tuningThresholdInDecibels) || other.tuningThresholdInDecibels == tuningThresholdInDecibels));
 }
 
 
 @override
-int get hashCode => runtimeType.hashCode;
+int get hashCode => Object.hash(runtimeType,tuningThresholdInDecibels);
 
 @override
 String toString() {
-  return 'TunerState.initialized()';
+  return 'TunerState.initialized(tuningThresholdInDecibels: $tuningThresholdInDecibels)';
 }
 
 
 }
 
+/// @nodoc
+abstract mixin class _$InitializedCopyWith<$Res> implements $TunerStateCopyWith<$Res> {
+  factory _$InitializedCopyWith(_Initialized value, $Res Function(_Initialized) _then) = __$InitializedCopyWithImpl;
+@override @useResult
+$Res call({
+ double tuningThresholdInDecibels
+});
 
 
+
+
+}
+/// @nodoc
+class __$InitializedCopyWithImpl<$Res>
+    implements _$InitializedCopyWith<$Res> {
+  __$InitializedCopyWithImpl(this._self, this._then);
+
+  final _Initialized _self;
+  final $Res Function(_Initialized) _then;
+
+/// Create a copy of TunerState
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? tuningThresholdInDecibels = null,}) {
+  return _then(_Initialized(
+tuningThresholdInDecibels: null == tuningThresholdInDecibels ? _self.tuningThresholdInDecibels : tuningThresholdInDecibels // ignore: cast_nullable_to_non_nullable
+as double,
+  ));
+}
+
+
+}
 
 /// @nodoc
 
 
 class _Stopped implements TunerState {
-  const _Stopped();
+  const _Stopped({required this.calibrationOffset, required this.tuningThresholdInDecibels, this.lastOctave, this.lastKey, this.lastPosition});
   
 
+ final  double? calibrationOffset;
+@override final  double tuningThresholdInDecibels;
+ final  int? lastOctave;
+ final  String? lastKey;
+ final  double? lastPosition;
 
-
+/// Create a copy of TunerState
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$StoppedCopyWith<_Stopped> get copyWith => __$StoppedCopyWithImpl<_Stopped>(this, _$identity);
 
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Stopped);
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Stopped&&(identical(other.calibrationOffset, calibrationOffset) || other.calibrationOffset == calibrationOffset)&&(identical(other.tuningThresholdInDecibels, tuningThresholdInDecibels) || other.tuningThresholdInDecibels == tuningThresholdInDecibels)&&(identical(other.lastOctave, lastOctave) || other.lastOctave == lastOctave)&&(identical(other.lastKey, lastKey) || other.lastKey == lastKey)&&(identical(other.lastPosition, lastPosition) || other.lastPosition == lastPosition));
 }
 
 
 @override
-int get hashCode => runtimeType.hashCode;
+int get hashCode => Object.hash(runtimeType,calibrationOffset,tuningThresholdInDecibels,lastOctave,lastKey,lastPosition);
 
 @override
 String toString() {
-  return 'TunerState.stopped()';
+  return 'TunerState.stopped(calibrationOffset: $calibrationOffset, tuningThresholdInDecibels: $tuningThresholdInDecibels, lastOctave: $lastOctave, lastKey: $lastKey, lastPosition: $lastPosition)';
 }
 
 
 }
 
+/// @nodoc
+abstract mixin class _$StoppedCopyWith<$Res> implements $TunerStateCopyWith<$Res> {
+  factory _$StoppedCopyWith(_Stopped value, $Res Function(_Stopped) _then) = __$StoppedCopyWithImpl;
+@override @useResult
+$Res call({
+ double? calibrationOffset, double tuningThresholdInDecibels, int? lastOctave, String? lastKey, double? lastPosition
+});
 
 
+
+
+}
+/// @nodoc
+class __$StoppedCopyWithImpl<$Res>
+    implements _$StoppedCopyWith<$Res> {
+  __$StoppedCopyWithImpl(this._self, this._then);
+
+  final _Stopped _self;
+  final $Res Function(_Stopped) _then;
+
+/// Create a copy of TunerState
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? calibrationOffset = freezed,Object? tuningThresholdInDecibels = null,Object? lastOctave = freezed,Object? lastKey = freezed,Object? lastPosition = freezed,}) {
+  return _then(_Stopped(
+calibrationOffset: freezed == calibrationOffset ? _self.calibrationOffset : calibrationOffset // ignore: cast_nullable_to_non_nullable
+as double?,tuningThresholdInDecibels: null == tuningThresholdInDecibels ? _self.tuningThresholdInDecibels : tuningThresholdInDecibels // ignore: cast_nullable_to_non_nullable
+as double,lastOctave: freezed == lastOctave ? _self.lastOctave : lastOctave // ignore: cast_nullable_to_non_nullable
+as int?,lastKey: freezed == lastKey ? _self.lastKey : lastKey // ignore: cast_nullable_to_non_nullable
+as String?,lastPosition: freezed == lastPosition ? _self.lastPosition : lastPosition // ignore: cast_nullable_to_non_nullable
+as double?,
+  ));
+}
+
+
+}
 
 /// @nodoc
 
 
 class _ErrorInitializing implements TunerState {
-  const _ErrorInitializing({required this.message});
+  const _ErrorInitializing({required this.tuningThresholdInDecibels, required this.message});
   
 
+@override final  double tuningThresholdInDecibels;
  final  String message;
 
 /// Create a copy of TunerState
 /// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
+@override @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
 _$ErrorInitializingCopyWith<_ErrorInitializing> get copyWith => __$ErrorInitializingCopyWithImpl<_ErrorInitializing>(this, _$identity);
 
@@ -348,16 +524,16 @@ _$ErrorInitializingCopyWith<_ErrorInitializing> get copyWith => __$ErrorInitiali
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ErrorInitializing&&(identical(other.message, message) || other.message == message));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ErrorInitializing&&(identical(other.tuningThresholdInDecibels, tuningThresholdInDecibels) || other.tuningThresholdInDecibels == tuningThresholdInDecibels)&&(identical(other.message, message) || other.message == message));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,message);
+int get hashCode => Object.hash(runtimeType,tuningThresholdInDecibels,message);
 
 @override
 String toString() {
-  return 'TunerState.errorInitializing(message: $message)';
+  return 'TunerState.errorInitializing(tuningThresholdInDecibels: $tuningThresholdInDecibels, message: $message)';
 }
 
 
@@ -366,9 +542,9 @@ String toString() {
 /// @nodoc
 abstract mixin class _$ErrorInitializingCopyWith<$Res> implements $TunerStateCopyWith<$Res> {
   factory _$ErrorInitializingCopyWith(_ErrorInitializing value, $Res Function(_ErrorInitializing) _then) = __$ErrorInitializingCopyWithImpl;
-@useResult
+@override @useResult
 $Res call({
- String message
+ double tuningThresholdInDecibels, String message
 });
 
 
@@ -385,9 +561,10 @@ class __$ErrorInitializingCopyWithImpl<$Res>
 
 /// Create a copy of TunerState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? message = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? tuningThresholdInDecibels = null,Object? message = null,}) {
   return _then(_ErrorInitializing(
-message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
+tuningThresholdInDecibels: null == tuningThresholdInDecibels ? _self.tuningThresholdInDecibels : tuningThresholdInDecibels // ignore: cast_nullable_to_non_nullable
+as double,message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }
@@ -399,17 +576,19 @@ as String,
 
 
 class _Tuning implements TunerState {
-  const _Tuning({required this.key, required this.octave, required this.position, required this.isTuned});
+  const _Tuning({required this.key, required this.octave, required this.position, required this.isTuned, required this.calibrationOffset, required this.tuningThresholdInDecibels});
   
 
  final  String key;
  final  int octave;
  final  double position;
  final  bool isTuned;
+ final  double? calibrationOffset;
+@override final  double tuningThresholdInDecibels;
 
 /// Create a copy of TunerState
 /// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
+@override @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
 _$TuningCopyWith<_Tuning> get copyWith => __$TuningCopyWithImpl<_Tuning>(this, _$identity);
 
@@ -417,16 +596,16 @@ _$TuningCopyWith<_Tuning> get copyWith => __$TuningCopyWithImpl<_Tuning>(this, _
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Tuning&&(identical(other.key, key) || other.key == key)&&(identical(other.octave, octave) || other.octave == octave)&&(identical(other.position, position) || other.position == position)&&(identical(other.isTuned, isTuned) || other.isTuned == isTuned));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Tuning&&(identical(other.key, key) || other.key == key)&&(identical(other.octave, octave) || other.octave == octave)&&(identical(other.position, position) || other.position == position)&&(identical(other.isTuned, isTuned) || other.isTuned == isTuned)&&(identical(other.calibrationOffset, calibrationOffset) || other.calibrationOffset == calibrationOffset)&&(identical(other.tuningThresholdInDecibels, tuningThresholdInDecibels) || other.tuningThresholdInDecibels == tuningThresholdInDecibels));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,key,octave,position,isTuned);
+int get hashCode => Object.hash(runtimeType,key,octave,position,isTuned,calibrationOffset,tuningThresholdInDecibels);
 
 @override
 String toString() {
-  return 'TunerState.tuning(key: $key, octave: $octave, position: $position, isTuned: $isTuned)';
+  return 'TunerState.tuning(key: $key, octave: $octave, position: $position, isTuned: $isTuned, calibrationOffset: $calibrationOffset, tuningThresholdInDecibels: $tuningThresholdInDecibels)';
 }
 
 
@@ -435,9 +614,9 @@ String toString() {
 /// @nodoc
 abstract mixin class _$TuningCopyWith<$Res> implements $TunerStateCopyWith<$Res> {
   factory _$TuningCopyWith(_Tuning value, $Res Function(_Tuning) _then) = __$TuningCopyWithImpl;
-@useResult
+@override @useResult
 $Res call({
- String key, int octave, double position, bool isTuned
+ String key, int octave, double position, bool isTuned, double? calibrationOffset, double tuningThresholdInDecibels
 });
 
 
@@ -454,13 +633,15 @@ class __$TuningCopyWithImpl<$Res>
 
 /// Create a copy of TunerState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? key = null,Object? octave = null,Object? position = null,Object? isTuned = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? key = null,Object? octave = null,Object? position = null,Object? isTuned = null,Object? calibrationOffset = freezed,Object? tuningThresholdInDecibels = null,}) {
   return _then(_Tuning(
 key: null == key ? _self.key : key // ignore: cast_nullable_to_non_nullable
 as String,octave: null == octave ? _self.octave : octave // ignore: cast_nullable_to_non_nullable
 as int,position: null == position ? _self.position : position // ignore: cast_nullable_to_non_nullable
 as double,isTuned: null == isTuned ? _self.isTuned : isTuned // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,calibrationOffset: freezed == calibrationOffset ? _self.calibrationOffset : calibrationOffset // ignore: cast_nullable_to_non_nullable
+as double?,tuningThresholdInDecibels: null == tuningThresholdInDecibels ? _self.tuningThresholdInDecibels : tuningThresholdInDecibels // ignore: cast_nullable_to_non_nullable
+as double,
   ));
 }
 

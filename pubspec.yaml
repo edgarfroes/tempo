@@ -21,6 +21,9 @@ dependencies:
   permission_handler: ^12.0.1
   audioplayers: ^6.5.1
   get_it: ^9.2.0
+  shared_preferences: ^2.5.5
+  json_annotation: ^4.11.0
+  audio_streamer: ^4.3.0
 
 dev_dependencies:
   flutter_test:
@@ -29,6 +32,7 @@ dev_dependencies:
   freezed: ^3.1.0
   build_runner: ^2.10.5
   flutter_gen_runner: ^5.12.0
+  json_serializable: ^6.13.1
 
 flutter:
   uses-material-design: true

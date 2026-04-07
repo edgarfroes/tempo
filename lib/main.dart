@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:tempo/locator.dart';
+import 'package:tempo/repositories/audio_capture/audio_capture_repository.dart';
+import 'package:tempo/screens/meter_screen.dart';
 import 'package:tempo/screens/tap_to_bpm_screen.dart';
 import 'package:tempo/screens/tuner_screen.dart';
-import 'package:tempo/services/audio_capture/audio_capture_service.dart';
 
 Future<void> main() async {
   setupLocator();
 
   WidgetsFlutterBinding.ensureInitialized();
 
-  await locator.get<AudioCaptureService>().init();
+  await locator.get<AudioCaptureRepository>().init();
 
   runApp(const MyApp());
 }
@@ -48,7 +49,11 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final screens = <Widget Function()>[TapToBpmScreen.new, TunerScreen.new];
+    final screens = <Widget Function()>[
+      TapToBpmScreen.new,
+      TunerScreen.new,
+      MeterScreen.new,
+    ];
 
     return Scaffold(
       appBar: AppBar(
@@ -80,12 +85,16 @@ class _MyHomePageState extends State<MyHomePage> {
                 },
                 items: const [
                   BottomNavigationBarItem(
-                    icon: Icon(Icons.touch_app),
+                    icon: Icon(Icons.touch_app_rounded),
                     label: 'BPM',
                   ),
                   BottomNavigationBarItem(
-                    icon: Icon(Icons.music_note),
+                    icon: Icon(Icons.music_note_rounded),
                     label: 'Tuner',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.volume_up_rounded),
+                    label: 'Meter',
                   ),
                 ],
               );
